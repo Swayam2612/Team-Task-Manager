@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://invigorating-youth-production.up.railway.app"
+      "https://task-team-manager.up.railway.app"
     ],
     credentials: true
   })
