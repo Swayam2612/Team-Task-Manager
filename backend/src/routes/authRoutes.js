@@ -1,7 +1,21 @@
-// backend/src/routes/authRoutes.js
-
 const router =
 require("express").Router();
+
+const cors =
+require("cors");
+
+router.use(
+
+  cors({
+
+    origin:
+    "https://task-team-manager.up.railway.app",
+
+    credentials:true
+
+  })
+
+);
 
 const db =
 require("../db/database");
@@ -10,186 +24,243 @@ require("../db/database");
    SIGNUP
 ========================= */
 
-router.post(
-  "/signup",
-  (req,res)=>{
+router.post("/signup",(req,res)=>{
 
-    const {
+  const {
 
-      name,
+    name,
 
-      email,
+    email,
 
-      password,
+    password,
 
-      role
+    role
 
-    } = req.body;
+  } = req.body;
 
-    /* CHECK EXISTING USER */
+  if(
 
-    db.get(
-      `
-      SELECT *
-      FROM users
-      WHERE email = ?
-      `,
-      [email],
-      (err,user)=>{
+    !name ||
 
-        if(err){
+    !email ||
 
-          console.log(err);
+    !password
 
-          return res
-            .status(500)
-            .json({
-              error:"Database error"
-            });
+  ){
 
-        }
+    return res
+      .status(400)
+      .json({
 
-        if(user){
+        error:
+        "All fields required"
 
-          return res
-            .status(400)
-            .json({
-              error:"User already exists"
-            });
+      });
 
-        }
+  }
 
-        /* CREATE USER */
+  db.get(
+    `
+    SELECT *
 
-        db.run(
-          `
-          INSERT INTO users(
+    FROM users
 
-            name,
+    WHERE email = ?
+    `,
+    [email],
+    (err,user)=>{
 
-            email,
+      if(err){
 
-            password,
+        console.log(err);
 
-            role
+        return res
+          .status(500)
+          .json({
 
-          )
+            error:
+            "Database error"
 
-          VALUES(?,?,?,?)
-          `,
-          [
+          });
 
-            name || "",
+      }
 
-            email || "",
+      if(user){
 
-            password || "",
+        return res
+          .status(400)
+          .json({
 
-            role || "Team Member"
+            error:
+            "Email already exists"
 
-          ],
-          function(err){
+          });
 
-            if(err){
+      }
 
-              console.log(err);
+      db.run(
+        `
+        INSERT INTO users(
 
-              return res
-                .status(500)
-                .json({
-                  error:"Signup failed"
-                });
+          name,
+
+          email,
+
+          password,
+
+          role
+
+        )
+
+        VALUES(?,?,?,?)
+        `,
+        [
+
+          name,
+
+          email,
+
+          password,
+
+          role || "Member"
+
+        ],
+        function(err){
+
+          if(err){
+
+            console.log(err);
+
+            return res
+              .status(500)
+              .json({
+
+                error:
+                "Failed to create account"
+
+              });
+
+          }
+
+          res.json({
+
+            success:true,
+
+            user:{
+
+              id:this.lastID,
+
+              name,
+
+              email,
+
+              role:
+              role || "Member"
 
             }
 
-            res.json({
+          });
 
-              success:true,
+        }
+      );
 
-              id:this.lastID
+    }
+  );
 
-            });
-
-          }
-        )
-
-      }
-    )
-
-  }
-);
+});
 
 /* =========================
    LOGIN
 ========================= */
 
-router.post(
-  "/login",
-  (req,res)=>{
+router.post("/login",(req,res)=>{
 
-    const {
+  const {
+
+    email,
+
+    password
+
+  } = req.body;
+
+  if(
+
+    !email ||
+
+    !password
+
+  ){
+
+    return res
+      .status(400)
+      .json({
+
+        error:
+        "Email and password required"
+
+      });
+
+  }
+
+  db.get(
+    `
+    SELECT *
+
+    FROM users
+
+    WHERE email = ?
+
+    AND password = ?
+    `,
+    [
 
       email,
 
       password
 
-    } = req.body;
+    ],
+    (err,user)=>{
 
-    db.get(
-      `
-      SELECT *
-      FROM users
+      if(err){
 
-      WHERE email = ?
-      AND password = ?
-      `,
-      [
+        console.log(err);
 
-        email,
+        return res
+          .status(500)
+          .json({
 
-        password
+            error:
+            "Database error"
 
-      ],
-      (err,user)=>{
-
-        if(err){
-
-          console.log(err);
-
-          return res
-            .status(500)
-            .json({
-              error:"Database error"
-            });
-
-        }
-
-        if(!user){
-
-          return res
-            .status(401)
-            .json({
-              error:"Invalid credentials"
-            });
-
-        }
-
-        res.json({
-
-          id:user.id,
-
-          name:user.name,
-
-          email:user.email,
-
-          role:user.role
-
-        });
+          });
 
       }
-    )
 
-  }
-);
+      if(!user){
 
-module.exports = router;
+        return res
+          .status(401)
+          .json({
+
+            error:
+            "Invalid credentials"
+
+          });
+
+      }
+
+      res.json({
+
+        success:true,
+
+        user
+
+      });
+
+    }
+  );
+
+});
+
+module.exports =
+router;

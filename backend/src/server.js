@@ -47,7 +47,10 @@ app.use(
 
 );
 
-app.options("*", cors());
+app.options("*", cors({
+  origin:"https://task-team-manager.up.railway.app",
+  credentials:true
+}));
 
 /* =========================
    MIDDLEWARE
