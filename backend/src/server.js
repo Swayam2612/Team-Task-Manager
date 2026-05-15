@@ -14,12 +14,12 @@ require("./db/database");
 /* MIDDLEWARE */
 
 app.use(
+
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://task-team-manager.up.railway.app"
-    ],
-    credentials: true
+
+    origin:"https://task-team-manager.up.railway.app",
+
+    credentials:true
   })
 );
 
