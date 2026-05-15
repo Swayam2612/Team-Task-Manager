@@ -1,4 +1,4 @@
-# Enterprise Team Task Manager
+# Team Task Manager
 
 Professional Full Stack Task Manager with:
 - Authentication
