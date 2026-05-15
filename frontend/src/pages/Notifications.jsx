@@ -20,13 +20,45 @@ export default function Notifications(){
 
   },[]);
 
+  /* =========================
+     FETCH NOTIFICATIONS
+  ========================= */
+
   const fetchNotifications = async()=>{
 
     try{
 
+      let user = {};
+
+      try{
+
+        user = JSON.parse(
+
+          localStorage.getItem(
+            "user"
+          ) || "{}"
+
+        );
+
+      }catch(err){
+
+        console.log(err);
+
+      }
+
+      if(!user?.id){
+
+        setNotifications([]);
+
+        return;
+
+      }
+
       const res =
       await api.get(
-        "/notifications"
+
+        `/notifications?user_id=${user.id}`
+
       );
 
       setNotifications(
@@ -46,6 +78,10 @@ export default function Notifications(){
     }
 
   };
+
+  /* =========================
+     MARK AS READ
+  ========================= */
 
   const markAsRead = async(id)=>{
 

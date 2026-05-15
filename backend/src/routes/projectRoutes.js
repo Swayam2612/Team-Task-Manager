@@ -19,6 +19,16 @@ router.get("/",(req,res)=>{
   const user_id =
   req.query.user_id;
 
+  if(!user_id){
+
+    return res
+      .status(400)
+      .json({
+        error:"user_id required"
+      });
+
+  }
+
   db.all(
     `
     SELECT *
@@ -44,10 +54,16 @@ router.get("/",(req,res)=>{
 
       }
 
-      res.json(rows);
+      res.json(
+
+        Array.isArray(rows)
+        ? rows
+        : []
+
+      );
 
     }
-  )
+  );
 
 });
 
@@ -80,10 +96,20 @@ router.get("/:id",(req,res)=>{
 
       }
 
+      if(!row){
+
+        return res
+          .status(404)
+          .json({
+            error:"Project not found"
+          });
+
+      }
+
       res.json(row);
 
     }
-  )
+  );
 
 });
 
@@ -92,7 +118,6 @@ router.get("/:id",(req,res)=>{
 ========================= */
 
 router.post("/",(req,res)=>{
-  console.log(req.body);
 
   const {
 
@@ -105,6 +130,16 @@ router.post("/",(req,res)=>{
     deadline
 
   } = req.body;
+
+  if(!user_id || !title){
+
+    return res
+      .status(400)
+      .json({
+        error:"Missing required fields"
+      });
+
+  }
 
   db.run(
     `
@@ -148,10 +183,12 @@ router.post("/",(req,res)=>{
       }
 
       createNotification(
+        user_id,
         `New project created: ${title}`
       );
 
       createActivity(
+        user_id,
         `Project created: ${title}`
       );
 
@@ -164,7 +201,7 @@ router.post("/",(req,res)=>{
       });
 
     }
-  )
+  );
 
 });
 
@@ -175,6 +212,8 @@ router.post("/",(req,res)=>{
 router.put("/:id",(req,res)=>{
 
   const {
+
+    user_id,
 
     title,
 
@@ -200,11 +239,11 @@ router.put("/:id",(req,res)=>{
     `,
     [
 
-      title,
+      title || "",
 
-      description,
+      description || "",
 
-      deadline,
+      deadline || "",
 
       req.params.id
 
@@ -224,10 +263,12 @@ router.put("/:id",(req,res)=>{
       }
 
       createNotification(
+        user_id,
         `Project updated: ${title}`
       );
 
       createActivity(
+        user_id,
         `Project updated: ${title}`
       );
 
@@ -238,7 +279,7 @@ router.put("/:id",(req,res)=>{
       });
 
     }
-  )
+  );
 
 });
 
@@ -269,14 +310,6 @@ router.delete("/:id",(req,res)=>{
 
       }
 
-      createNotification(
-        `Project deleted`
-      );
-
-      createActivity(
-        `Project deleted`
-      );
-
       res.json({
 
         success:true
@@ -284,7 +317,7 @@ router.delete("/:id",(req,res)=>{
       });
 
     }
-  )
+  );
 
 });
 

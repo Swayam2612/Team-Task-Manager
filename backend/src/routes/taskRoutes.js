@@ -19,6 +19,16 @@ router.get("/",(req,res)=>{
   const user_id =
   req.query.user_id;
 
+  if(!user_id){
+
+    return res
+      .status(400)
+      .json({
+        error:"user_id required"
+      });
+
+  }
+
   db.all(
     `
     SELECT tasks.*,
@@ -56,10 +66,16 @@ router.get("/",(req,res)=>{
 
       }
 
-      res.json(rows);
+      res.json(
+
+        Array.isArray(rows)
+        ? rows
+        : []
+
+      );
 
     }
-  )
+  );
 
 });
 
@@ -104,10 +120,20 @@ router.get("/:id",(req,res)=>{
 
       }
 
+      if(!row){
+
+        return res
+          .status(404)
+          .json({
+            error:"Task not found"
+          });
+
+      }
+
       res.json(row);
 
     }
-  )
+  );
 
 });
 
@@ -142,6 +168,16 @@ router.post("/",(req,res)=>{
     attachments
 
   } = req.body;
+
+  if(!user_id || !title){
+
+    return res
+      .status(400)
+      .json({
+        error:"Missing required fields"
+      });
+
+  }
 
   db.run(
     `
@@ -194,11 +230,15 @@ router.post("/",(req,res)=>{
       assigned_to || "",
 
       JSON.stringify(
-        comments || []
+        Array.isArray(comments)
+        ? comments
+        : []
       ),
 
       JSON.stringify(
-        attachments || []
+        Array.isArray(attachments)
+        ? attachments
+        : []
       )
 
     ],
@@ -217,10 +257,12 @@ router.post("/",(req,res)=>{
       }
 
       createNotification(
+        user_id,
         `New task created: ${title}`
       );
 
       createActivity(
+        user_id,
         `Task created: ${title}`
       );
 
@@ -233,7 +275,7 @@ router.post("/",(req,res)=>{
       });
 
     }
-  )
+  );
 
 });
 
@@ -244,6 +286,8 @@ router.post("/",(req,res)=>{
 router.put("/:id",(req,res)=>{
 
   const {
+
+    user_id,
 
     title,
 
@@ -314,11 +358,15 @@ router.put("/:id",(req,res)=>{
       assigned_to || "",
 
       JSON.stringify(
-        comments || []
+        Array.isArray(comments)
+        ? comments
+        : []
       ),
 
       JSON.stringify(
-        attachments || []
+        Array.isArray(attachments)
+        ? attachments
+        : []
       ),
 
       req.params.id
@@ -339,10 +387,12 @@ router.put("/:id",(req,res)=>{
       }
 
       createNotification(
+        user_id,
         `Task updated: ${title}`
       );
 
       createActivity(
+        user_id,
         `Task updated: ${title}`
       );
 
@@ -353,7 +403,7 @@ router.put("/:id",(req,res)=>{
       });
 
     }
-  )
+  );
 
 });
 
@@ -384,14 +434,6 @@ router.delete("/:id",(req,res)=>{
 
       }
 
-      createNotification(
-        `Task deleted`
-      );
-
-      createActivity(
-        `Task deleted`
-      );
-
       res.json({
 
         success:true
@@ -399,7 +441,7 @@ router.delete("/:id",(req,res)=>{
       });
 
     }
-  )
+  );
 
 });
 

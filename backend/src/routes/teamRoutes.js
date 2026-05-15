@@ -19,6 +19,16 @@ router.get("/",(req,res)=>{
   const user_id =
   req.query.user_id;
 
+  if(!user_id){
+
+    return res
+      .status(400)
+      .json({
+        error:"user_id required"
+      });
+
+  }
+
   db.all(
     `
     SELECT teams.*,
@@ -50,10 +60,16 @@ router.get("/",(req,res)=>{
 
       }
 
-      res.json(rows);
+      res.json(
+
+        Array.isArray(rows)
+        ? rows
+        : []
+
+      );
 
     }
-  )
+  );
 
 });
 
@@ -92,10 +108,20 @@ router.get("/:id",(req,res)=>{
 
       }
 
+      if(!row){
+
+        return res
+          .status(404)
+          .json({
+            error:"Team not found"
+          });
+
+      }
+
       res.json(row);
 
     }
-  )
+  );
 
 });
 
@@ -116,6 +142,16 @@ router.post("/",(req,res)=>{
     project_id
 
   } = req.body;
+
+  if(!user_id || !name){
+
+    return res
+      .status(400)
+      .json({
+        error:"Missing required fields"
+      });
+
+  }
 
   db.run(
     `
@@ -159,10 +195,12 @@ router.post("/",(req,res)=>{
       }
 
       createNotification(
+        user_id,
         `New team created: ${name}`
       );
 
       createActivity(
+        user_id,
         `Team created: ${name}`
       );
 
@@ -175,7 +213,7 @@ router.post("/",(req,res)=>{
       });
 
     }
-  )
+  );
 
 });
 
@@ -186,6 +224,8 @@ router.post("/",(req,res)=>{
 router.put("/:id",(req,res)=>{
 
   const {
+
+    user_id,
 
     name,
 
@@ -211,11 +251,11 @@ router.put("/:id",(req,res)=>{
     `,
     [
 
-      name,
+      name || "",
 
-      description,
+      description || "",
 
-      project_id,
+      project_id || null,
 
       req.params.id
 
@@ -235,10 +275,12 @@ router.put("/:id",(req,res)=>{
       }
 
       createNotification(
+        user_id,
         `Team updated: ${name}`
       );
 
       createActivity(
+        user_id,
         `Team updated: ${name}`
       );
 
@@ -249,7 +291,7 @@ router.put("/:id",(req,res)=>{
       });
 
     }
-  )
+  );
 
 });
 
@@ -280,14 +322,6 @@ router.delete("/:id",(req,res)=>{
 
       }
 
-      createNotification(
-        `Team deleted`
-      );
-
-      createActivity(
-        `Team deleted`
-      );
-
       res.json({
 
         success:true
@@ -295,7 +329,7 @@ router.delete("/:id",(req,res)=>{
       });
 
     }
-  )
+  );
 
 });
 

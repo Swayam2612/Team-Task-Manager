@@ -24,8 +24,38 @@ export default function Activity(){
 
     try{
 
+      let user = {};
+
+      try{
+
+        user = JSON.parse(
+
+          localStorage.getItem(
+            "user"
+          ) || "{}"
+
+        );
+
+      }catch(err){
+
+        console.log(err);
+
+      }
+
+      if(!user?.id){
+
+        setActivities([]);
+
+        return;
+
+      }
+
       const res =
-      await api.get("/activities");
+      await api.get(
+
+        `/activities?user_id=${user.id}`
+
+      );
 
       setActivities(
 

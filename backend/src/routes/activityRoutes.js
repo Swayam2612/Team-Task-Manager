@@ -4,7 +4,24 @@ require("express").Router();
 const db =
 require("../db/database");
 
+/* =========================
+   GET ACTIVITIES
+========================= */
+
 router.get("/",(req,res)=>{
+
+  const user_id =
+  req.query.user_id;
+
+  if(!user_id){
+
+    return res
+      .status(400)
+      .json({
+        error:"user_id required"
+      });
+
+  }
 
   db.all(
     `
@@ -12,9 +29,11 @@ router.get("/",(req,res)=>{
 
     FROM activities
 
+    WHERE user_id = ?
+
     ORDER BY created_at DESC
     `,
-    [],
+    [user_id],
     (err,rows)=>{
 
       if(err){
@@ -23,14 +42,22 @@ router.get("/",(req,res)=>{
 
         return res
           .status(500)
-          .json(err);
+          .json({
+            error:"Failed to fetch activities"
+          });
 
       }
 
-      res.json(rows);
+      res.json(
+
+        Array.isArray(rows)
+        ? rows
+        : []
+
+      );
 
     }
-  )
+  );
 
 });
 
