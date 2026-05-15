@@ -4,19 +4,29 @@ require("sqlite3").verbose();
 const path =
 require("path");
 
+/* DATABASE PATH */
+
+const dbPath =
+path.resolve(
+  process.cwd(),
+  "taskmanager.db"
+);
+
+/* DATABASE CONNECTION */
+
 const db =
 new sqlite3.Database(
 
-  path.join(
-    __dirname,
-    "../../taskmanager.db"
-  ),
+  dbPath,
 
   (err)=>{
 
     if(err){
 
-      console.log(err);
+      console.log(
+        "Database Connection Error:",
+        err
+      );
 
     }else{
 
