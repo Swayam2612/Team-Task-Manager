@@ -1,7 +1,13 @@
+// frontend/src/pages/Teams.jsx
+
 import {
   useEffect,
   useState
 } from "react";
+
+import {
+  Link
+} from "react-router-dom";
 
 import Navbar
 from "../components/Navbar";
@@ -26,6 +32,14 @@ export default function Teams(){
 
   });
 
+  const user = JSON.parse(
+
+    localStorage.getItem(
+      "user"
+    )
+
+  );
+
   useEffect(()=>{
 
     fetchTeams();
@@ -34,14 +48,24 @@ export default function Teams(){
 
   },[]);
 
+  /* =========================
+     FETCH TEAMS
+  ========================= */
+
   const fetchTeams = async()=>{
 
     try{
 
       const res =
-      await api.get("/teams");
+      await api.get(
 
-      setTeams(res.data);
+        `/teams?user_id=${user.id}`
+
+      );
+
+      setTeams(
+        res.data
+      );
 
     }catch(err){
 
@@ -51,13 +75,13 @@ export default function Teams(){
 
   };
 
+  /* =========================
+     FETCH PROJECTS
+  ========================= */
+
   const fetchProjects = async()=>{
 
     try{
-
-      const user = JSON.parse(
-        localStorage.getItem("user")
-      );
 
       const res =
       await api.get(
@@ -66,7 +90,9 @@ export default function Teams(){
 
       );
 
-      setProjects(res.data);
+      setProjects(
+        res.data
+      );
 
     }catch(err){
 
@@ -75,6 +101,10 @@ export default function Teams(){
     }
 
   };
+
+  /* =========================
+     HANDLE CHANGE
+  ========================= */
 
   const handleChange = (e)=>{
 
@@ -89,13 +119,23 @@ export default function Teams(){
 
   };
 
+  /* =========================
+     CREATE TEAM
+  ========================= */
+
   const createTeam = async()=>{
 
     try{
 
       await api.post(
         "/teams",
-        formData
+        {
+
+          ...formData,
+
+          user_id:user.id
+
+        }
       );
 
       setFormData({
@@ -119,6 +159,10 @@ export default function Teams(){
     }
 
   };
+
+  /* =========================
+     DELETE TEAM
+  ========================= */
 
   const deleteTeam = async(id)=>{
 
@@ -153,10 +197,12 @@ export default function Teams(){
           </h1>
 
           <p>
-            Manage teams and project collaboration.
+            Create and manage collaborative teams.
           </p>
 
         </div>
+
+        {/* CREATE TEAM */}
 
         <div className="task-form-card">
 
@@ -173,6 +219,7 @@ export default function Teams(){
               </label>
 
               <input
+                type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
@@ -188,6 +235,7 @@ export default function Teams(){
               </label>
 
               <input
+                type="text"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
@@ -199,7 +247,7 @@ export default function Teams(){
             <div className="form-group">
 
               <label>
-                Linked Project
+                Select Project
               </label>
 
               <select
@@ -209,7 +257,7 @@ export default function Teams(){
               >
 
                 <option value="">
-                  Select Project
+                  Choose Project
                 </option>
 
                 {projects.map(project=>(
@@ -240,51 +288,94 @@ export default function Teams(){
 
         </div>
 
+        {/* TEAMS GRID */}
+
         <div className="teams-grid">
 
-          {teams.map(team=>(
+          {teams.length === 0 ? (
 
-            <div
-              className="team-card"
-              key={team.id}
-            >
+            <div className="empty-state">
 
-              <div className="team-top">
-
-                <h2>
-                  {team.name}
-                </h2>
-
-                <button
-                  className="delete-btn"
-                  onClick={()=>
-                    deleteTeam(team.id)
-                  }
-                >
-                  Delete
-                </button>
-
-              </div>
-
-              <p>
-                {team.description}
-              </p>
-
-              <div className="team-project">
-
-                <strong>
-                  Linked Project:
-                </strong>
-
-                {" "}
-
-                {team.project_title || "None"}
-
-              </div>
+              ✨ No teams yet.
+              Create your first team.
 
             </div>
 
-          ))}
+          ) : (
+
+            teams.map(team=>(
+
+              <Link
+                to={`/teams/${team.id}`}
+                key={team.id}
+              >
+
+                <div className="team-card">
+
+                  <div className="task-top">
+
+                    <h2>
+                      {team.name}
+                    </h2>
+
+                    <button
+                      className="delete-btn"
+                      onClick={(e)=>{
+
+                        e.preventDefault();
+
+                        deleteTeam(team.id);
+
+                      }}
+                    >
+                      Delete
+                    </button>
+
+                  </div>
+
+                  <p>
+                    {team.description || "No description"}
+                  </p>
+
+                  <div
+                    className="task-meta"
+                    style={{
+                      marginTop:"16px"
+                    }}
+                  >
+
+                    <span>
+
+                      Linked Project:
+                      {" "}
+
+                      {team.project_title || "None"}
+
+                    </span>
+
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop:"18px"
+                    }}
+                  >
+
+                    <span
+                      className="view-link"
+                    >
+                      View Team →
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </Link>
+
+            ))
+
+          )}
 
         </div>
 

@@ -1,10 +1,13 @@
+// frontend/src/pages/TeamDetails.jsx
+
 import {
   useEffect,
   useState
 } from "react";
 
 import {
-  useParams
+  useParams,
+  Link
 } from "react-router-dom";
 
 import Navbar
@@ -15,9 +18,13 @@ from "../services/api";
 
 export default function TeamDetails(){
 
-  const {id} = useParams();
+  const {id} =
+  useParams();
 
   const [team,setTeam] =
+  useState(null);
+
+  const [project,setProject] =
   useState(null);
 
   const [tasks,setTasks] =
@@ -25,48 +32,61 @@ export default function TeamDetails(){
 
   useEffect(()=>{
 
-    fetchTeam();
-    fetchTasks();
+    fetchTeamData();
 
   },[]);
 
-  const fetchTeam = async()=>{
+  /* =========================
+     FETCH TEAM DATA
+  ========================= */
+
+  const fetchTeamData = async()=>{
 
     try{
 
-      const res =
-      await api.get("/teams");
-
-      const foundTeam =
-      res.data.find(
-        item =>
-        item.id == id
-      );
-
-      setTeam(foundTeam);
-
-    }catch(err){
-
-      console.log(err);
-
-    }
-
-  };
-
-  const fetchTasks = async()=>{
-
-    try{
+      /* TEAM */
 
       const res =
-      await api.get("/tasks");
-
-      const filtered =
-      res.data.filter(
-        task =>
-        task.team_id == id
+      await api.get(
+        `/teams/${id}`
       );
 
-      setTasks(filtered);
+      setTeam(
+        res.data
+      );
+
+      /* LINKED PROJECT */
+
+      if(res.data.project_id){
+
+        const projectRes =
+        await api.get(
+          `/projects/${res.data.project_id}`
+        );
+
+        setProject(
+          projectRes.data
+        );
+
+        /* FETCH RELATED TASKS */
+
+        const tasksRes =
+        await api.get("/tasks");
+
+        const filteredTasks =
+        tasksRes.data.filter(task=>
+
+          String(task.project_id)
+          ===
+          String(res.data.project_id)
+
+        );
+
+        setTasks(
+          filteredTasks
+        );
+
+      }
 
     }catch(err){
 
@@ -97,21 +117,27 @@ export default function TeamDetails(){
   }
 
   const completedTasks =
-  tasks.filter(
-    task =>
+  tasks.filter(task=>
+
     task.status === "Completed"
+
   ).length;
 
-  const progress =
-  tasks.length === 0
-  ? 0
-  : Math.round(
-      (
-        completedTasks
-        /
-        tasks.length
-      ) * 100
-    );
+  const productivity =
+
+    tasks.length === 0
+
+    ? 0
+
+    : Math.round(
+
+        (
+          completedTasks
+          /
+          tasks.length
+        ) * 100
+
+      );
 
   return(
 
@@ -121,151 +147,237 @@ export default function TeamDetails(){
 
       <div className="page">
 
-        <div className="project-detail-header">
+        {/* HEADER */}
 
-          <div>
+        <div className="page-header">
 
-            <h1>
-              {team.name}
-            </h1>
+          <h1>
+            {team.name}
+          </h1>
 
-            <p>
-
-              Linked Project:
-              {" "}
-
-              {team.project_title || "None"}
-
-            </p>
-
-          </div>
-
-          <div className="project-progress-large">
-
-            {progress}%
-
-          </div>
+          <p>
+            Team collaboration workspace and productivity overview.
+          </p>
 
         </div>
 
-        <div className="stats">
+        {/* TEAM OVERVIEW */}
 
-          <div className="stat-card">
-
-            <h2>
-              {tasks.length}
-            </h2>
-
-            <p>
-              Team Tasks
-            </p>
-
-          </div>
-
-          <div className="stat-card">
-
-            <h2>
-              {completedTasks}
-            </h2>
-
-            <p>
-              Completed
-            </p>
-
-          </div>
-
-        </div>
-
-        <div className="project-section">
+        <div className="dashboard-card">
 
           <h2>
-            Team Tasks
+            Team Overview
           </h2>
 
-          <div className="task-list">
+          <p
+            style={{
+              marginTop:"18px",
+              lineHeight:"1.7"
+            }}
+          >
 
-            {tasks.length === 0 ? (
+            {team.description || "No description"}
 
-              <div className="empty-state">
+          </p>
 
-                No tasks assigned to this team.
+          <div
+            className="task-meta"
+            style={{
+              marginTop:"22px"
+            }}
+          >
+
+            <span>
+
+              Tasks:
+              {" "}
+              {tasks.length}
+
+            </span>
+
+            <span>
+
+              Completed:
+              {" "}
+              {completedTasks}
+
+            </span>
+
+            <span>
+
+              Productivity:
+              {" "}
+              {productivity}%
+
+            </span>
+
+          </div>
+
+        </div>
+
+        {/* LINKED PROJECT */}
+
+        <div
+          className="dashboard-card"
+          style={{
+            marginTop:"24px"
+          }}
+        >
+
+          <div className="card-header">
+
+            <h2>
+              Linked Project
+            </h2>
+
+          </div>
+
+          {!project ? (
+
+            <div className="empty-state">
+
+              ✨ No linked project.
+
+            </div>
+
+          ) : (
+
+            <Link
+              to={`/projects/${project.id}`}
+            >
+
+              <div className="dashboard-item">
+
+                <h3>
+                  {project.title}
+                </h3>
+
+                <p>
+                  {project.description}
+                </p>
 
               </div>
 
-            ) : (
+            </Link>
 
-              tasks.map(task=>(
+          )}
 
-                <div
-                  className="task-card"
-                  key={task.id}
-                >
+        </div>
 
-                  <div className="task-card-top">
+        {/* TEAM TASKS */}
 
-                    <div>
+        <div
+          className="dashboard-card"
+          style={{
+            marginTop:"24px"
+          }}
+        >
 
-                      <h3>
-                        {task.title}
-                      </h3>
+          <div className="card-header">
 
-                      <p>
-                        {task.description}
-                      </p>
+            <h2>
+              Team Tasks
+            </h2>
 
-                    </div>
+          </div>
 
-                    <div
-                      className={`priority-badge ${task.priority}`}
-                    >
-                      {task.priority}
-                    </div>
+          {tasks.length === 0 ? (
 
-                  </div>
+            <div className="empty-state">
 
-                  <div className="task-meta">
+              ✨ No tasks linked.
 
-                    <div>
+            </div>
 
-                      <strong>
-                        Assigned:
-                      </strong>
+          ) : (
 
-                      {" "}
+            tasks.map(task=>(
 
-                      {task.assigned_to || "None"}
+              <Link
+                to={`/tasks/${task.id}`}
+                key={task.id}
+              >
 
-                    </div>
+                <div className="dashboard-item">
 
-                    <div>
+                  <h3>
+                    {task.title}
+                  </h3>
 
-                      <strong>
-                        Due:
-                      </strong>
+                  <p>
 
-                      {" "}
+                    {task.priority}
 
-                      {task.due_date || "None"}
+                    {" • "}
 
-                    </div>
+                    {task.status}
 
-                  </div>
-
-                  <div className="task-footer">
-
-                    <div
-                      className={`status-pill ${task.status}`}
-                    >
-                      {task.status}
-                    </div>
-
-                  </div>
+                  </p>
 
                 </div>
 
-              ))
+              </Link>
 
-            )}
+            ))
+
+          )}
+
+        </div>
+
+        {/* TEAM PRODUCTIVITY */}
+
+        <div
+          className="dashboard-card"
+          style={{
+            marginTop:"24px"
+          }}
+        >
+
+          <div className="card-header">
+
+            <h2>
+              Productivity Insights
+            </h2>
+
+          </div>
+
+          <div className="insights-grid">
+
+            <div className="insight-card">
+
+              <h3>
+                Total Tasks
+              </h3>
+
+              <p>
+                {tasks.length}
+              </p>
+
+            </div>
+
+            <div className="insight-card">
+
+              <h3>
+                Completed
+              </h3>
+
+              <p>
+                {completedTasks}
+              </p>
+
+            </div>
+
+            <div className="insight-card">
+
+              <h3>
+                Productivity
+              </h3>
+
+              <p>
+                {productivity}%
+              </p>
+
+            </div>
 
           </div>
 

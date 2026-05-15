@@ -1,10 +1,13 @@
+// frontend/src/pages/TaskDetails.jsx
+
 import {
   useEffect,
   useState
 } from "react";
 
 import {
-  useParams
+  useParams,
+  Link
 } from "react-router-dom";
 
 import Navbar
@@ -18,41 +21,71 @@ export default function TaskDetails(){
   const {id} =
   useParams();
 
-  const user =
-  JSON.parse(
-    localStorage.getItem("user")
-  );
+  const [task,setTask] =
+  useState(null);
 
-  const [comments,setComments] =
-  useState([]);
-
-  const [attachments,setAttachments] =
-  useState([]);
+  const [project,setProject] =
+  useState(null);
 
   const [comment,setComment] =
   useState("");
 
-  const [file,setFile] =
+  const [attachment,setAttachment] =
   useState("");
 
   useEffect(()=>{
 
-    fetchComments();
-
-    fetchAttachments();
+    fetchTaskData();
 
   },[]);
 
-  const fetchComments = async()=>{
+  /* =========================
+     FETCH TASK DATA
+  ========================= */
+
+  const fetchTaskData = async()=>{
 
     try{
 
       const res =
       await api.get(
-        `/comments/${id}`
+        `/tasks/${id}`
       );
 
-      setComments(res.data);
+      const formatted = {
+
+        ...res.data,
+
+        comments:
+        res.data.comments
+        ? JSON.parse(res.data.comments)
+        : [],
+
+        attachments:
+        res.data.attachments
+        ? JSON.parse(res.data.attachments)
+        : []
+
+      };
+
+      setTask(
+        formatted
+      );
+
+      /* FETCH PROJECT */
+
+      if(formatted.project_id){
+
+        const projectRes =
+        await api.get(
+          `/projects/${formatted.project_id}`
+        );
+
+        setProject(
+          projectRes.data
+        );
+
+      }
 
     }catch(err){
 
@@ -62,51 +95,36 @@ export default function TaskDetails(){
 
   };
 
-  const fetchAttachments = async()=>{
-
-    try{
-
-      const res =
-      await api.get(
-        `/attachments/${id}`
-      );
-
-      setAttachments(res.data);
-
-    }catch(err){
-
-      console.log(err);
-
-    }
-
-  };
+  /* =========================
+     ADD COMMENT
+  ========================= */
 
   const addComment = async()=>{
 
-    if(!comment){
-
-      return;
-
-    }
-
     try{
 
-      await api.post(
-        "/comments",
+      const updatedComments = [
+
+        ...task.comments,
+
+        comment
+
+      ];
+
+      await api.put(
+        `/tasks/${id}`,
         {
 
-          task_id:id,
+          ...task,
 
-          user_name:user.name,
-
-          comment
+          comments:updatedComments
 
         }
       );
 
       setComment("");
 
-      fetchComments();
+      fetchTaskData();
 
     }catch(err){
 
@@ -116,32 +134,37 @@ export default function TaskDetails(){
 
   };
 
+  /* =========================
+     ADD ATTACHMENT
+  ========================= */
+
   const addAttachment = async()=>{
-
-    if(!file){
-
-      return;
-
-    }
 
     try{
 
-      await api.post(
-        "/attachments",
+      const updatedAttachments = [
+
+        ...task.attachments,
+
+        attachment
+
+      ];
+
+      await api.put(
+        `/tasks/${id}`,
         {
 
-          task_id:id,
+          ...task,
 
-          file_name:file,
-
-          file_url:file
+          attachments:
+          updatedAttachments
 
         }
       );
 
-      setFile("");
+      setAttachment("");
 
-      fetchAttachments();
+      fetchTaskData();
 
     }catch(err){
 
@@ -150,6 +173,26 @@ export default function TaskDetails(){
     }
 
   };
+
+  if(!task){
+
+    return(
+
+      <div>
+
+        <Navbar/>
+
+        <div className="page">
+
+          Loading...
+
+        </div>
+
+      </div>
+
+    )
+
+  }
 
   return(
 
@@ -159,39 +202,154 @@ export default function TaskDetails(){
 
       <div className="page">
 
+        {/* HEADER */}
+
         <div className="page-header">
 
           <h1>
-            Task Workspace
+            {task.title}
           </h1>
 
           <p>
-            Collaborate using comments
-            and attachments.
+            Complete task workspace and collaboration details.
           </p>
 
         </div>
 
-        <div className="workspace-grid">
+        {/* TASK OVERVIEW */}
+
+        <div className="dashboard-card">
+
+          <h2>
+            Task Overview
+          </h2>
+
+          <p
+            style={{
+              marginTop:"18px",
+              lineHeight:"1.7"
+            }}
+          >
+
+            {task.description || "No description"}
+
+          </p>
+
+          <div
+            className="task-meta"
+            style={{
+              marginTop:"22px"
+            }}
+          >
+
+            <span>
+              {task.priority}
+            </span>
+
+            <span>
+              {task.status}
+            </span>
+
+            <span>
+
+              Deadline:
+              {" "}
+              {task.deadline || "None"}
+
+            </span>
+
+          </div>
+
+        </div>
+
+        {/* LINKED PROJECT */}
+
+        <div
+          className="dashboard-card"
+          style={{
+            marginTop:"24px"
+          }}
+        >
+
+          <div className="card-header">
+
+            <h2>
+              Linked Project
+            </h2>
+
+          </div>
+
+          {!project ? (
+
+            <div className="empty-state">
+
+              ✨ No linked project.
+
+            </div>
+
+          ) : (
+
+            <Link
+              to={`/projects/${project.id}`}
+            >
+
+              <div className="dashboard-item">
+
+                <h3>
+                  {project.title}
+                </h3>
+
+                <p>
+                  {project.description}
+                </p>
+
+              </div>
+
+            </Link>
+
+          )}
+
+        </div>
+
+        {/* GRID */}
+
+        <div
+          className="dashboard-grid"
+          style={{
+            marginTop:"24px"
+          }}
+        >
 
           {/* COMMENTS */}
 
-          <div className="workspace-section">
+          <div className="dashboard-card">
 
-            <h2>
-              Comments
-            </h2>
+            <div className="card-header">
 
-            <div className="workspace-input">
+              <h2>
+                Comments
+              </h2>
 
-              <textarea
-                placeholder="Write comment..."
+            </div>
+
+            <div
+              style={{
+                marginBottom:"18px"
+              }}
+            >
+
+              <input
                 value={comment}
                 onChange={(e)=>
                   setComment(
                     e.target.value
                   )
                 }
+                placeholder="Add comment"
+                style={{
+                  width:"100%",
+                  marginBottom:"12px"
+                }}
               />
 
               <button
@@ -203,83 +361,111 @@ export default function TaskDetails(){
 
             </div>
 
-            <div className="comment-list">
+            {task.comments.length === 0 ? (
 
-              {comments.map(item=>(
+              <div className="empty-state">
+
+                ✨ No comments yet.
+
+              </div>
+
+            ) : (
+
+              task.comments.map(
+                (comment,index)=>(
 
                 <div
-                  className="comment-card"
-                  key={item.id}
+                  className="dashboard-item"
+                  key={index}
                 >
 
-                  <h3>
-                    {item.user_name}
-                  </h3>
-
                   <p>
-                    {item.comment}
+                    {comment}
                   </p>
-
-                  <span>
-                    {item.created_at}
-                  </span>
 
                 </div>
 
-              ))}
+              ))
 
-            </div>
+            )}
 
           </div>
 
           {/* ATTACHMENTS */}
 
-          <div className="workspace-section">
+          <div className="dashboard-card">
 
-            <h2>
-              Attachments
-            </h2>
+            <div className="card-header">
 
-            <div className="workspace-input">
+              <h2>
+                Attachments / URLs
+              </h2>
+
+            </div>
+
+            <div
+              style={{
+                marginBottom:"18px"
+              }}
+            >
 
               <input
-                placeholder="Paste file URL"
-                value={file}
+                value={attachment}
                 onChange={(e)=>
-                  setFile(
+                  setAttachment(
                     e.target.value
                   )
                 }
+                placeholder="Paste URL"
+                style={{
+                  width:"100%",
+                  marginBottom:"12px"
+                }}
               />
 
               <button
                 className="primary-btn"
                 onClick={addAttachment}
               >
-                Add File
+                Add URL
               </button>
 
             </div>
 
-            <div className="attachment-list">
+            {task.attachments.length === 0 ? (
 
-              {attachments.map(file=>(
+              <div className="empty-state">
 
-                <a
-                  href={file.file_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="attachment-card"
-                  key={file.id}
+                ✨ No attachments yet.
+
+              </div>
+
+            ) : (
+
+              task.attachments.map(
+                (link,index)=>(
+
+                <div
+                  className="dashboard-item"
+                  key={index}
                 >
 
-                  📎 {file.file_name}
+                  <a
+                    href={link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="view-link"
+                  >
 
-                </a>
+                    {link}
 
-              ))}
+                  </a>
 
-            </div>
+                </div>
+
+              ))
+
+            )}
 
           </div>
 

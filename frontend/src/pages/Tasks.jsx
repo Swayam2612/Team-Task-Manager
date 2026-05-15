@@ -5,6 +5,10 @@ import {
   useState
 } from "react";
 
+import {
+  Link
+} from "react-router-dom";
+
 import Navbar
 from "../components/Navbar";
 
@@ -19,6 +23,9 @@ export default function Tasks(){
   const [projects,setProjects] =
   useState([]);
 
+  const [teams,setTeams] =
+  useState([]);
+
   const [formData,setFormData] =
   useState({
 
@@ -27,12 +34,17 @@ export default function Tasks(){
     priority:"Medium",
     status:"Pending",
     deadline:"",
-    project_id:""
+    project_id:"",
+    team_id:""
 
   });
 
   const user = JSON.parse(
-    localStorage.getItem("user")
+
+    localStorage.getItem(
+      "user"
+    )
+
   );
 
   useEffect(()=>{
@@ -41,14 +53,24 @@ export default function Tasks(){
 
     fetchProjects();
 
+    fetchTeams();
+
   },[]);
+
+  /* =========================
+     FETCH TASKS
+  ========================= */
 
   const fetchTasks = async()=>{
 
     try{
 
       const res =
-      await api.get("/tasks");
+      await api.get(
+
+        `/tasks?user_id=${user.id}`
+
+      );
 
       const formatted =
       res.data.map(task=>({
@@ -67,7 +89,9 @@ export default function Tasks(){
 
       }));
 
-      setTasks(formatted);
+      setTasks(
+        formatted
+      );
 
     }catch(err){
 
@@ -76,6 +100,10 @@ export default function Tasks(){
     }
 
   };
+
+  /* =========================
+     FETCH PROJECTS
+  ========================= */
 
   const fetchProjects = async()=>{
 
@@ -88,7 +116,9 @@ export default function Tasks(){
 
       );
 
-      setProjects(res.data);
+      setProjects(
+        res.data
+      );
 
     }catch(err){
 
@@ -97,6 +127,37 @@ export default function Tasks(){
     }
 
   };
+
+  /* =========================
+     FETCH TEAMS
+  ========================= */
+
+  const fetchTeams = async()=>{
+
+    try{
+
+      const res =
+      await api.get(
+
+        `/teams?user_id=${user.id}`
+
+      );
+
+      setTeams(
+        res.data
+      );
+
+    }catch(err){
+
+      console.log(err);
+
+    }
+
+  };
+
+  /* =========================
+     HANDLE CHANGE
+  ========================= */
 
   const handleChange = (e)=>{
 
@@ -111,6 +172,10 @@ export default function Tasks(){
 
   };
 
+  /* =========================
+     CREATE TASK
+  ========================= */
+
   const createTask = async()=>{
 
     try{
@@ -121,7 +186,11 @@ export default function Tasks(){
 
           ...formData,
 
-          user_id:user.id
+          user_id:user.id,
+
+          comments:[],
+
+          attachments:[]
 
         }
       );
@@ -133,7 +202,8 @@ export default function Tasks(){
         priority:"Medium",
         status:"Pending",
         deadline:"",
-        project_id:""
+        project_id:"",
+        team_id:""
 
       });
 
@@ -150,6 +220,10 @@ export default function Tasks(){
     }
 
   };
+
+  /* =========================
+     DELETE TASK
+  ========================= */
 
   const deleteTask = async(id)=>{
 
@@ -177,6 +251,8 @@ export default function Tasks(){
 
       <div className="page">
 
+        {/* HEADER */}
+
         <div className="page-header">
 
           <h1>
@@ -184,10 +260,12 @@ export default function Tasks(){
           </h1>
 
           <p>
-            Manage all tasks.
+            Manage tasks, assignments, priorities and deadlines.
           </p>
 
         </div>
+
+        {/* CREATE TASK */}
 
         <div className="task-form-card">
 
@@ -197,6 +275,8 @@ export default function Tasks(){
 
           <div className="task-form">
 
+            {/* TITLE */}
+
             <div className="form-group">
 
               <label>
@@ -204,6 +284,7 @@ export default function Tasks(){
               </label>
 
               <input
+                type="text"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
@@ -212,6 +293,8 @@ export default function Tasks(){
 
             </div>
 
+            {/* DESCRIPTION */}
+
             <div className="form-group">
 
               <label>
@@ -219,6 +302,7 @@ export default function Tasks(){
               </label>
 
               <input
+                type="text"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
@@ -226,6 +310,8 @@ export default function Tasks(){
               />
 
             </div>
+
+            {/* PRIORITY */}
 
             <div className="form-group">
 
@@ -239,21 +325,23 @@ export default function Tasks(){
                 onChange={handleChange}
               >
 
-                <option>
+                <option value="Low">
                   Low
                 </option>
 
-                <option>
+                <option value="Medium">
                   Medium
                 </option>
 
-                <option>
+                <option value="High">
                   High
                 </option>
 
               </select>
 
             </div>
+
+            {/* STATUS */}
 
             <div className="form-group">
 
@@ -267,21 +355,23 @@ export default function Tasks(){
                 onChange={handleChange}
               >
 
-                <option>
+                <option value="Pending">
                   Pending
                 </option>
 
-                <option>
+                <option value="In Progress">
                   In Progress
                 </option>
 
-                <option>
+                <option value="Completed">
                   Completed
                 </option>
 
               </select>
 
             </div>
+
+            {/* DEADLINE */}
 
             <div className="form-group">
 
@@ -298,10 +388,12 @@ export default function Tasks(){
 
             </div>
 
+            {/* PROJECT */}
+
             <div className="form-group">
 
               <label>
-                Project
+                Linked Project
               </label>
 
               <select
@@ -331,6 +423,41 @@ export default function Tasks(){
 
             </div>
 
+            {/* TEAM */}
+
+            <div className="form-group">
+
+              <label>
+                Assign Team
+              </label>
+
+              <select
+                name="team_id"
+                value={formData.team_id}
+                onChange={handleChange}
+              >
+
+                <option value="">
+                  Select Team
+                </option>
+
+                {teams.map(team=>(
+
+                  <option
+                    key={team.id}
+                    value={team.id}
+                  >
+
+                    {team.name}
+
+                  </option>
+
+                ))}
+
+              </select>
+
+            </div>
+
           </div>
 
           <button
@@ -342,59 +469,116 @@ export default function Tasks(){
 
         </div>
 
+        {/* TASKS GRID */}
+
         <div className="tasks-grid">
 
-          {tasks.map(task=>(
+          {tasks.length === 0 ? (
 
-            <div
-              className="task-card"
-              key={task.id}
-            >
+            <div className="empty-state">
 
-              <div className="task-top">
-
-                <h2>
-                  {task.title}
-                </h2>
-
-                <button
-                  className="delete-btn"
-                  onClick={()=>
-                    deleteTask(task.id)
-                  }
-                >
-                  Delete
-                </button>
-
-              </div>
-
-              <p>
-                {task.description}
-              </p>
-
-              <div className="task-meta">
-
-                <span>
-                  {task.priority}
-                </span>
-
-                <span>
-                  {task.status}
-                </span>
-
-              </div>
-
-              <div className="task-deadline">
-
-                Deadline:
-                {" "}
-                {task.deadline || "None"}
-
-              </div>
+              ✨ No tasks yet.
+              Create your first task.
 
             </div>
 
-          ))}
+          ) : (
+
+            tasks.map(task=>(
+
+              <Link
+                to={`/tasks/${task.id}`}
+                key={task.id}
+              >
+
+                <div className="task-card">
+
+                  <div className="task-top">
+
+                    <h2>
+                      {task.title}
+                    </h2>
+
+                    <button
+                      className="delete-btn"
+                      onClick={(e)=>{
+
+                        e.preventDefault();
+
+                        deleteTask(task.id);
+
+                      }}
+                    >
+                      Delete
+                    </button>
+
+                  </div>
+
+                  <p>
+                    {task.description}
+                  </p>
+
+                  <div className="task-meta">
+
+                    <span>
+                      {task.priority}
+                    </span>
+
+                    <span>
+                      {task.status}
+                    </span>
+
+                  </div>
+
+                  <div
+                    className="task-meta"
+                    style={{
+                      marginTop:"10px"
+                    }}
+                  >
+
+                    {task.project_title && (
+
+                      <span>
+
+                        📁 {task.project_title}
+
+                      </span>
+
+                    )}
+
+                    {task.team_name && (
+
+                      <span>
+
+                        👥 {task.team_name}
+
+                      </span>
+
+                    )}
+
+                  </div>
+
+                  <div
+                    className="task-deadline"
+                    style={{
+                      marginTop:"14px"
+                    }}
+                  >
+
+                    Deadline:
+                    {" "}
+                    {task.deadline || "None"}
+
+                  </div>
+
+                </div>
+
+              </Link>
+
+            ))
+
+          )}
 
         </div>
 

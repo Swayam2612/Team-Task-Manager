@@ -4,7 +4,8 @@ require("sqlite3").verbose();
 const path =
 require("path");
 
-const db = new sqlite3.Database(
+const db =
+new sqlite3.Database(
 
   path.join(
     __dirname,
@@ -30,7 +31,7 @@ const db = new sqlite3.Database(
 );
 
 /* =========================
-   USERS
+   USERS TABLE
 ========================= */
 
 db.run(`
@@ -47,11 +48,12 @@ db.run(`
     role TEXT,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
   )
 `);
 
 /* =========================
-   PROJECTS
+   PROJECTS TABLE
 ========================= */
 
 db.run(`
@@ -68,11 +70,12 @@ db.run(`
     deadline TEXT,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
   )
 `);
 
 /* =========================
-   TEAMS
+   TEAMS TABLE
 ========================= */
 
 db.run(`
@@ -89,11 +92,12 @@ db.run(`
     project_id INTEGER,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
   )
 `);
 
 /* =========================
-   TASKS
+   TASKS TABLE
 ========================= */
 
 db.run(`
@@ -115,6 +119,8 @@ db.run(`
 
     project_id INTEGER,
 
+    team_id INTEGER,
+
     assigned_to TEXT,
 
     comments TEXT DEFAULT '[]',
@@ -122,11 +128,12 @@ db.run(`
     attachments TEXT DEFAULT '[]',
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
   )
 `);
 
 /* =========================
-   NOTIFICATIONS
+   NOTIFICATIONS TABLE
 ========================= */
 
 db.run(`
@@ -141,11 +148,12 @@ db.run(`
     is_read INTEGER DEFAULT 0,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
   )
 `);
 
 /* =========================
-   ACTIVITIES
+   ACTIVITIES TABLE
 ========================= */
 
 db.run(`
@@ -158,6 +166,7 @@ db.run(`
     message TEXT,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+
   )
 `);
 

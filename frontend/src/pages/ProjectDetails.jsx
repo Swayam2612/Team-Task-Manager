@@ -1,10 +1,13 @@
+// frontend/src/pages/ProjectDetails.jsx
+
 import {
   useEffect,
   useState
 } from "react";
 
 import {
-  useParams
+  useParams,
+  Link
 } from "react-router-dom";
 
 import Navbar
@@ -15,7 +18,8 @@ from "../services/api";
 
 export default function ProjectDetails(){
 
-  const {id} = useParams();
+  const {id} =
+  useParams();
 
   const [project,setProject] =
   useState(null);
@@ -28,72 +32,64 @@ export default function ProjectDetails(){
 
   useEffect(()=>{
 
-    fetchProject();
-    fetchTasks();
-    fetchTeams();
+    fetchProjectData();
 
   },[]);
 
-  const fetchProject = async()=>{
+  /* =========================
+     FETCH PROJECT DATA
+  ========================= */
+
+  const fetchProjectData = async()=>{
 
     try{
 
-      const res =
-      await api.get("/projects");
+      /* PROJECT */
 
-      const foundProject =
-      res.data.find(
-        item =>
-        item.id == id
+      const res =
+      await api.get(
+        `/projects/${id}`
       );
 
-      setProject(foundProject);
+      setProject(
+        res.data
+      );
 
-    }catch(err){
+      /* TASKS */
 
-      console.log(err);
-
-    }
-
-  };
-
-  const fetchTasks = async()=>{
-
-    try{
-
-      const res =
+      const tasksRes =
       await api.get("/tasks");
 
-      const filtered =
-      res.data.filter(
-        task =>
-        task.project_id == id
+      const filteredTasks =
+      tasksRes.data.filter(task=>
+
+        String(task.project_id)
+        ===
+        String(id)
+
       );
 
-      setTasks(filtered);
+      setTasks(
+        filteredTasks
+      );
 
-    }catch(err){
+      /* TEAMS */
 
-      console.log(err);
-
-    }
-
-  };
-
-  const fetchTeams = async()=>{
-
-    try{
-
-      const res =
+      const teamsRes =
       await api.get("/teams");
 
-      const filtered =
-      res.data.filter(
-        team =>
-        team.project_id == id
+      const filteredTeams =
+      teamsRes.data.filter(team=>
+
+        String(team.project_id)
+        ===
+        String(id)
+
       );
 
-      setTeams(filtered);
+      setTeams(
+        filteredTeams
+      );
 
     }catch(err){
 
@@ -124,21 +120,27 @@ export default function ProjectDetails(){
   }
 
   const completedTasks =
-  tasks.filter(
-    task =>
+  tasks.filter(task=>
+
     task.status === "Completed"
+
   ).length;
 
-  const progress =
-  tasks.length === 0
-  ? 0
-  : Math.round(
-      (
-        completedTasks
-        /
-        tasks.length
-      ) * 100
-    );
+  const progressPercentage =
+
+    tasks.length === 0
+
+    ? 0
+
+    : Math.round(
+
+        (
+          completedTasks
+          /
+          tasks.length
+        ) * 100
+
+      );
 
   return(
 
@@ -148,210 +150,242 @@ export default function ProjectDetails(){
 
       <div className="page">
 
-        <div className="project-detail-header">
+        {/* HEADER */}
 
-          <div>
+        <div className="page-header">
 
-            <h1>
-              {project.title}
-            </h1>
+          <h1>
+            {project.title}
+          </h1>
 
-            <p>
-              {project.description}
-            </p>
-
-          </div>
-
-          <div className="project-progress-large">
-
-            {progress}%
-
-          </div>
+          <p>
+            Detailed workspace overview for this project.
+          </p>
 
         </div>
 
-        <div className="stats">
+        {/* PROJECT OVERVIEW */}
 
-          <div className="stat-card">
+        <div className="dashboard-card">
 
-            <h2>
+          <h2>
+            Project Overview
+          </h2>
+
+          <p
+            style={{
+              marginTop:"18px",
+              lineHeight:"1.7"
+            }}
+          >
+
+            {project.description || "No description"}
+
+          </p>
+
+          <div
+            className="task-meta"
+            style={{
+              marginTop:"22px"
+            }}
+          >
+
+            <span>
+
+              Deadline:
+              {" "}
+              {project.deadline || "None"}
+
+            </span>
+
+            <span>
+
+              Tasks:
+              {" "}
               {tasks.length}
-            </h2>
 
-            <p>
-              Total Tasks
-            </p>
+            </span>
 
-          </div>
+            <span>
 
-          <div className="stat-card">
-
-            <h2>
-              {completedTasks}
-            </h2>
-
-            <p>
-              Completed Tasks
-            </p>
-
-          </div>
-
-          <div className="stat-card">
-
-            <h2>
+              Teams:
+              {" "}
               {teams.length}
-            </h2>
 
-            <p>
-              Teams
-            </p>
+            </span>
 
           </div>
 
         </div>
 
-        <div className="project-sections">
+        {/* PROGRESS */}
 
-          <div className="project-section">
+        <div
+          className="dashboard-card"
+          style={{
+            marginTop:"24px"
+          }}
+        >
+
+          <div className="card-header">
 
             <h2>
-              Teams
+              Project Progress
             </h2>
 
-            <div className="teams-grid">
+            <strong>
+              {progressPercentage}%
+            </strong>
 
-              {teams.length === 0 ? (
+          </div>
 
-                <div className="empty-state">
+          <div
+            style={{
 
-                  No teams assigned.
+              width:"100%",
 
-                </div>
+              height:"14px",
 
-              ) : (
+              borderRadius:"999px",
 
-                teams.map(team=>(
+              background:"#e2e8f0",
 
-                  <div
-                    className="team-card"
-                    key={team.id}
-                  >
+              overflow:"hidden",
 
-                    <div className="team-avatar">
+              marginTop:"18px"
 
-                      {team.name
-                        ?.charAt(0)
-                        ?.toUpperCase()
-                      }
+            }}
+          >
 
-                    </div>
+            <div
+              style={{
+
+                width:`${progressPercentage}%`,
+
+                height:"100%",
+
+                background:
+                "linear-gradient(90deg,#2563eb,#7c3aed)",
+
+                borderRadius:"999px"
+
+              }}
+            />
+
+          </div>
+
+        </div>
+
+        {/* GRID */}
+
+        <div
+          className="dashboard-grid"
+          style={{
+            marginTop:"24px"
+          }}
+        >
+
+          {/* LINKED TASKS */}
+
+          <div className="dashboard-card">
+
+            <div className="card-header">
+
+              <h2>
+                Linked Tasks
+              </h2>
+
+            </div>
+
+            {tasks.length === 0 ? (
+
+              <div className="empty-state">
+
+                ✨ No tasks linked.
+
+              </div>
+
+            ) : (
+
+              tasks.map(task=>(
+
+                <Link
+                  to={`/tasks/${task.id}`}
+                  key={task.id}
+                >
+
+                  <div className="dashboard-item">
+
+                    <h3>
+                      {task.title}
+                    </h3>
+
+                    <p>
+
+                      {task.priority}
+
+                      {" • "}
+
+                      {task.status}
+
+                    </p>
+
+                  </div>
+
+                </Link>
+
+              ))
+
+            )}
+
+          </div>
+
+          {/* LINKED TEAMS */}
+
+          <div className="dashboard-card">
+
+            <div className="card-header">
+
+              <h2>
+                Linked Teams
+              </h2>
+
+            </div>
+
+            {teams.length === 0 ? (
+
+              <div className="empty-state">
+
+                ✨ No teams linked.
+
+              </div>
+
+            ) : (
+
+              teams.map(team=>(
+
+                <Link
+                  to={`/teams/${team.id}`}
+                  key={team.id}
+                >
+
+                  <div className="dashboard-item">
 
                     <h3>
                       {team.name}
                     </h3>
 
-                  </div>
-
-                ))
-
-              )}
-
-            </div>
-
-          </div>
-
-          <div className="project-section">
-
-            <h2>
-              Tasks
-            </h2>
-
-            <div className="task-list">
-
-              {tasks.length === 0 ? (
-
-                <div className="empty-state">
-
-                  No tasks for this project.
-
-                </div>
-
-              ) : (
-
-                tasks.map(task=>(
-
-                  <div
-                    className="task-card"
-                    key={task.id}
-                  >
-
-                    <div className="task-card-top">
-
-                      <div>
-
-                        <h3>
-                          {task.title}
-                        </h3>
-
-                        <p>
-                          {task.description}
-                        </p>
-
-                      </div>
-
-                      <div
-                        className={`priority-badge ${task.priority}`}
-                      >
-                        {task.priority}
-                      </div>
-
-                    </div>
-
-                    <div className="task-meta">
-
-                      <div>
-
-                        <strong>
-                          Assigned:
-                        </strong>
-
-                        {" "}
-
-                        {task.assigned_to || "None"}
-
-                      </div>
-
-                      <div>
-
-                        <strong>
-                          Due:
-                        </strong>
-
-                        {" "}
-
-                        {task.due_date || "None"}
-
-                      </div>
-
-                    </div>
-
-                    <div className="task-footer">
-
-                      <div
-                        className={`status-pill ${task.status}`}
-                      >
-                        {task.status}
-                      </div>
-
-                    </div>
+                    <p>
+                      {team.description || "No description"}
+                    </p>
 
                   </div>
 
-                ))
+                </Link>
 
-              )}
+              ))
 
-            </div>
+            )}
 
           </div>
 

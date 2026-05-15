@@ -16,23 +16,26 @@ require("../utils/activityHelper");
 
 router.get("/",(req,res)=>{
 
+  const user_id =
+  req.query.user_id;
+
   db.all(
     `
-    SELECT
+    SELECT teams.*,
 
-      teams.*,
-
-      projects.title
-      AS project_title
+    projects.title
+    AS project_title
 
     FROM teams
 
     LEFT JOIN projects
     ON teams.project_id = projects.id
 
+    WHERE teams.user_id = ?
+
     ORDER BY teams.created_at DESC
     `,
-    [],
+    [user_id],
     (err,rows)=>{
 
       if(err){
@@ -62,11 +65,17 @@ router.get("/:id",(req,res)=>{
 
   db.get(
     `
-    SELECT *
+    SELECT teams.*,
+
+    projects.title
+    AS project_title
 
     FROM teams
 
-    WHERE id=?
+    LEFT JOIN projects
+    ON teams.project_id = projects.id
+
+    WHERE teams.id = ?
     `,
     [req.params.id],
     (err,row)=>{
@@ -96,9 +105,9 @@ router.get("/:id",(req,res)=>{
 
 router.post("/",(req,res)=>{
 
-  console.log(req.body);
-
   const {
+
+    user_id,
 
     name,
 
@@ -112,6 +121,8 @@ router.post("/",(req,res)=>{
     `
     INSERT INTO teams(
 
+      user_id,
+
       name,
 
       description,
@@ -120,9 +131,11 @@ router.post("/",(req,res)=>{
 
     )
 
-    VALUES(?,?,?)
+    VALUES(?,?,?,?)
     `,
     [
+
+      user_id,
 
       name || "",
 
@@ -188,13 +201,13 @@ router.put("/:id",(req,res)=>{
 
     SET
 
-      name=?,
+      name = ?,
 
-      description=?,
+      description = ?,
 
-      project_id=?
+      project_id = ?
 
-    WHERE id=?
+    WHERE id = ?
     `,
     [
 
@@ -250,7 +263,7 @@ router.delete("/:id",(req,res)=>{
     `
     DELETE FROM teams
 
-    WHERE id=?
+    WHERE id = ?
     `,
     [req.params.id],
     function(err){

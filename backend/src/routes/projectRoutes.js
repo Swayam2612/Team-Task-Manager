@@ -63,7 +63,7 @@ router.get("/:id",(req,res)=>{
 
     FROM projects
 
-    WHERE id=?
+    WHERE id = ?
     `,
     [req.params.id],
     (err,row)=>{
@@ -92,7 +92,6 @@ router.get("/:id",(req,res)=>{
 ========================= */
 
 router.post("/",(req,res)=>{
-
   console.log(req.body);
 
   const {
@@ -191,13 +190,13 @@ router.put("/:id",(req,res)=>{
 
     SET
 
-      title=?,
+      title = ?,
 
-      description=?,
+      description = ?,
 
-      deadline=?
+      deadline = ?
 
-    WHERE id=?
+    WHERE id = ?
     `,
     [
 
@@ -253,7 +252,7 @@ router.delete("/:id",(req,res)=>{
     `
     DELETE FROM projects
 
-    WHERE id=?
+    WHERE id = ?
     `,
     [req.params.id],
     function(err){

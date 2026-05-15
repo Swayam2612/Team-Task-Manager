@@ -16,23 +16,32 @@ require("../utils/activityHelper");
 
 router.get("/",(req,res)=>{
 
+  const user_id =
+  req.query.user_id;
+
   db.all(
     `
-    SELECT
+    SELECT tasks.*,
 
-      tasks.*,
+    projects.title
+    AS project_title,
 
-      projects.title
-      AS project_title
+    teams.name
+    AS team_name
 
     FROM tasks
 
     LEFT JOIN projects
     ON tasks.project_id = projects.id
 
+    LEFT JOIN teams
+    ON tasks.team_id = teams.id
+
+    WHERE tasks.user_id = ?
+
     ORDER BY tasks.created_at DESC
     `,
-    [],
+    [user_id],
     (err,rows)=>{
 
       if(err){
@@ -62,11 +71,23 @@ router.get("/:id",(req,res)=>{
 
   db.get(
     `
-    SELECT *
+    SELECT tasks.*,
+
+    projects.title
+    AS project_title,
+
+    teams.name
+    AS team_name
 
     FROM tasks
 
-    WHERE id=?
+    LEFT JOIN projects
+    ON tasks.project_id = projects.id
+
+    LEFT JOIN teams
+    ON tasks.team_id = teams.id
+
+    WHERE tasks.id = ?
     `,
     [req.params.id],
     (err,row)=>{
@@ -96,9 +117,9 @@ router.get("/:id",(req,res)=>{
 
 router.post("/",(req,res)=>{
 
-  console.log(req.body);
-
   const {
+
+    user_id,
 
     title,
 
@@ -112,13 +133,21 @@ router.post("/",(req,res)=>{
 
     project_id,
 
-    assigned_to
+    team_id,
+
+    assigned_to,
+
+    comments,
+
+    attachments
 
   } = req.body;
 
   db.run(
     `
     INSERT INTO tasks(
+
+      user_id,
 
       title,
 
@@ -132,6 +161,8 @@ router.post("/",(req,res)=>{
 
       project_id,
 
+      team_id,
+
       assigned_to,
 
       comments,
@@ -140,9 +171,11 @@ router.post("/",(req,res)=>{
 
     )
 
-    VALUES(?,?,?,?,?,?,?,?,?)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?)
     `,
     [
+
+      user_id,
 
       title || "",
 
@@ -156,11 +189,17 @@ router.post("/",(req,res)=>{
 
       project_id || null,
 
+      team_id || null,
+
       assigned_to || "",
 
-      "[]",
+      JSON.stringify(
+        comments || []
+      ),
 
-      "[]"
+      JSON.stringify(
+        attachments || []
+      )
 
     ],
     function(err){
@@ -218,6 +257,8 @@ router.put("/:id",(req,res)=>{
 
     project_id,
 
+    team_id,
+
     assigned_to,
 
     comments,
@@ -232,45 +273,53 @@ router.put("/:id",(req,res)=>{
 
     SET
 
-      title=?,
+      title = ?,
 
-      description=?,
+      description = ?,
 
-      priority=?,
+      priority = ?,
 
-      status=?,
+      status = ?,
 
-      deadline=?,
+      deadline = ?,
 
-      project_id=?,
+      project_id = ?,
 
-      assigned_to=?,
+      team_id = ?,
 
-      comments=?,
+      assigned_to = ?,
 
-      attachments=?
+      comments = ?,
 
-    WHERE id=?
+      attachments = ?
+
+    WHERE id = ?
     `,
     [
 
-      title,
+      title || "",
 
-      description,
+      description || "",
 
-      priority,
+      priority || "Medium",
 
-      status,
+      status || "Pending",
 
-      deadline,
+      deadline || "",
 
-      project_id,
+      project_id || null,
 
-      assigned_to,
+      team_id || null,
 
-      comments || "[]",
+      assigned_to || "",
 
-      attachments || "[]",
+      JSON.stringify(
+        comments || []
+      ),
+
+      JSON.stringify(
+        attachments || []
+      ),
 
       req.params.id
 
@@ -318,7 +367,7 @@ router.delete("/:id",(req,res)=>{
     `
     DELETE FROM tasks
 
-    WHERE id=?
+    WHERE id = ?
     `,
     [req.params.id],
     function(err){

@@ -34,8 +34,20 @@ export default function CalendarPage(){
 
     try{
 
-      const res =
-      await api.get("/tasks");
+      const user = JSON.parse(
+
+  localStorage.getItem(
+    "user"
+  )
+
+);
+
+const res =
+await api.get(
+
+  `/tasks?user_id=${user.id}`
+
+);
 
       setTasks(res.data);
 
