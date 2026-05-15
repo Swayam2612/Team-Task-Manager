@@ -8,10 +8,11 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "node node_modules/vite/bin/vite.js build",
+    "build": "vite build",
     "start": "serve -s dist"
   },
   "dependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
     "axios": "^1.6.8",
     "lucide-react": "^1.16.0",
     "react": "^18.2.0",
@@ -19,10 +20,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
     "recharts": "^3.8.1",
-    "serve": "^14.2.6"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.2.1",
+    "serve": "^14.2.6",
     "vite": "^5.4.21"
   }
 }
