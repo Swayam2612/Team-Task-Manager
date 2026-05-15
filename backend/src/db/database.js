@@ -1,0 +1,164 @@
+const sqlite3 =
+require("sqlite3").verbose();
+
+const path =
+require("path");
+
+const db = new sqlite3.Database(
+
+  path.join(
+    __dirname,
+    "../../taskmanager.db"
+  ),
+
+  (err)=>{
+
+    if(err){
+
+      console.log(err);
+
+    }else{
+
+      console.log(
+        "SQLite Database Connected"
+      );
+
+    }
+
+  }
+
+);
+
+/* =========================
+   USERS
+========================= */
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS users(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    name TEXT,
+
+    email TEXT UNIQUE,
+
+    password TEXT,
+
+    role TEXT,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+/* =========================
+   PROJECTS
+========================= */
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS projects(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user_id INTEGER,
+
+    title TEXT,
+
+    description TEXT,
+
+    deadline TEXT,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+/* =========================
+   TEAMS
+========================= */
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS teams(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user_id INTEGER,
+
+    name TEXT,
+
+    description TEXT,
+
+    project_id INTEGER,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+/* =========================
+   TASKS
+========================= */
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS tasks(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user_id INTEGER,
+
+    title TEXT,
+
+    description TEXT,
+
+    priority TEXT,
+
+    status TEXT,
+
+    deadline TEXT,
+
+    project_id INTEGER,
+
+    assigned_to TEXT,
+
+    comments TEXT DEFAULT '[]',
+
+    attachments TEXT DEFAULT '[]',
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+/* =========================
+   NOTIFICATIONS
+========================= */
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS notifications(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user_id INTEGER,
+
+    message TEXT,
+
+    is_read INTEGER DEFAULT 0,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+/* =========================
+   ACTIVITIES
+========================= */
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS activities(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user_id INTEGER,
+
+    message TEXT,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+module.exports = db;
