@@ -1,5 +1,3 @@
-// frontend/src/pages/Teams.jsx
-
 import {
   useEffect,
   useState
@@ -36,15 +34,19 @@ export default function Teams(){
 
     localStorage.getItem(
       "user"
-    )
+    ) || "{}"
 
   );
 
   useEffect(()=>{
 
-    fetchTeams();
+    if(user?.id){
 
-    fetchProjects();
+      fetchTeams();
+
+      fetchProjects();
+
+    }
 
   },[]);
 
@@ -64,12 +66,18 @@ export default function Teams(){
       );
 
       setTeams(
-        res.data
+
+        Array.isArray(res.data)
+        ? res.data
+        : []
+
       );
 
     }catch(err){
 
       console.log(err);
+
+      setTeams([]);
 
     }
 
@@ -91,12 +99,18 @@ export default function Teams(){
       );
 
       setProjects(
-        res.data
+
+        Array.isArray(res.data)
+        ? res.data
+        : []
+
       );
 
     }catch(err){
 
       console.log(err);
+
+      setProjects([]);
 
     }
 
@@ -260,18 +274,25 @@ export default function Teams(){
                   Choose Project
                 </option>
 
-                {(Array.isArray(projects) ? projects : [])map(project=>(
+                {
 
-                  <option
-                    key={project.id}
-                    value={project.id}
-                  >
+                  (Array.isArray(projects)
+                    ? projects
+                    : []
+                  ).map((project)=>(
 
-                    {project.title}
+                    <option
+                      key={project.id}
+                      value={project.id}
+                    >
 
-                  </option>
+                      {project.title}
 
-                ))}
+                    </option>
+
+                  ))
+
+                }
 
               </select>
 
@@ -292,90 +313,97 @@ export default function Teams(){
 
         <div className="teams-grid">
 
-          {teams.length === 0 ? (
+          {
 
-            <div className="empty-state">
+            teams.length === 0 ? (
 
-              ✨ No teams yet.
-              Create your first team.
+              <div className="empty-state">
 
-            </div>
+                ✨ No teams yet.
+                Create your first team.
 
-          ) : (
+              </div>
 
-            (Array.isArray(teams) ? teams : [])map(team=>(
+            ) : (
 
-              <Link
-                to={`/teams/${team.id}`}
-                key={team.id}
-              >
+              (Array.isArray(teams)
+                ? teams
+                : []
+              ).map((team)=>(
 
-                <div className="team-card">
+                <Link
+                  to={`/teams/${team.id}`}
+                  key={team.id}
+                >
 
-                  <div className="task-top">
+                  <div className="team-card">
 
-                    <h2>
-                      {team.name}
-                    </h2>
+                    <div className="task-top">
 
-                    <button
-                      className="delete-btn"
-                      onClick={(e)=>{
+                      <h2>
+                        {team.name}
+                      </h2>
 
-                        e.preventDefault();
+                      <button
+                        className="delete-btn"
+                        onClick={(e)=>{
 
-                        deleteTeam(team.id);
+                          e.preventDefault();
 
+                          deleteTeam(team.id);
+
+                        }}
+                      >
+                        Delete
+                      </button>
+
+                    </div>
+
+                    <p>
+                      {team.description || "No description"}
+                    </p>
+
+                    <div
+                      className="task-meta"
+                      style={{
+                        marginTop:"16px"
                       }}
                     >
-                      Delete
-                    </button>
 
-                  </div>
+                      <span>
 
-                  <p>
-                    {team.description || "No description"}
-                  </p>
+                        Linked Project:
+                        {" "}
 
-                  <div
-                    className="task-meta"
-                    style={{
-                      marginTop:"16px"
-                    }}
-                  >
+                        {team.project_title || "None"}
 
-                    <span>
+                      </span>
 
-                      Linked Project:
-                      {" "}
+                    </div>
 
-                      {team.project_title || "None"}
-
-                    </span>
-
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop:"18px"
-                    }}
-                  >
-
-                    <span
-                      className="view-link"
+                    <div
+                      style={{
+                        marginTop:"18px"
+                      }}
                     >
-                      View Team →
-                    </span>
+
+                      <span
+                        className="view-link"
+                      >
+                        View Team →
+                      </span>
+
+                    </div>
 
                   </div>
 
-                </div>
+                </Link>
 
-              </Link>
+              ))
 
-            ))
+            )
 
-          )}
+          }
 
         </div>
 
@@ -383,6 +411,6 @@ export default function Teams(){
 
     </div>
 
-  )
+  );
 
 }

@@ -27,11 +27,19 @@ export default function Kanban(){
       const res =
       await api.get("/tasks");
 
-      setTasks(res.data);
+      setTasks(
+
+        Array.isArray(res.data)
+        ? res.data
+        : []
+
+      );
 
     }catch(err){
 
       console.log(err);
+
+      setTasks([]);
 
     }
 
@@ -67,7 +75,11 @@ export default function Kanban(){
 
   const getTasks = (status)=>{
 
-    return (Array.isArray(tasks) ? tasks : []).filter(
+    return (
+      Array.isArray(tasks)
+      ? tasks
+      : []
+    ).filter(
       task =>
       task.status === status
     );
@@ -106,158 +118,172 @@ export default function Kanban(){
 
         <div className="kanban-board">
 
-          {(Array.isArray(statuses) ? statuses : []).map(
+          {
 
-            <div
-              className="kanban-column"
-              key={status}
-            >
+            (Array.isArray(statuses)
+              ? statuses
+              : []
+            ).map((status)=>(
 
-              <div className="kanban-header">
+              <div
+                className="kanban-column"
+                key={status}
+              >
 
-                <h2>
-                  {status}
-                </h2>
+                <div className="kanban-header">
 
-                <span>
+                  <h2>
+                    {status}
+                  </h2>
+
+                  <span>
+
+                    {
+                      getTasks(status)
+                      .length
+                    }
+
+                  </span>
+
+                </div>
+
+                <div className="kanban-tasks">
 
                   {
-                    getTasks(status)
-                    .length
-                  }
 
-                </span>
-
-              </div>
-
-              <div className="kanban-tasks">
-
-                {(Array.isArray(getTasks(status)) ? getTasks(status) : []).map(
-
-                  <div
-                    className="kanban-card"
-                    key={task.id}
-                  >
-
-                    <div className="kanban-card-top">
-
-                      <h3>
-                        {task.title}
-                      </h3>
+                    (Array.isArray(getTasks(status))
+                      ? getTasks(status)
+                      : []
+                    ).map((task)=>(
 
                       <div
-                        className={`priority-badge ${task.priority}`}
+                        className="kanban-card"
+                        key={task.id}
                       >
-                        {task.priority}
+
+                        <div className="kanban-card-top">
+
+                          <h3>
+                            {task.title}
+                          </h3>
+
+                          <div
+                            className={`priority-badge ${task.priority}`}
+                          >
+                            {task.priority}
+                          </div>
+
+                        </div>
+
+                        <p>
+                          {task.description}
+                        </p>
+
+                        <div className="kanban-meta">
+
+                          <div>
+
+                            <strong>
+                              Project:
+                            </strong>
+
+                            {" "}
+
+                            {task.project_title || "None"}
+
+                          </div>
+
+                          <div>
+
+                            <strong>
+                              Team:
+                            </strong>
+
+                            {" "}
+
+                            {task.team_name || "None"}
+
+                          </div>
+
+                          <div>
+
+                            <strong>
+                              Assigned:
+                            </strong>
+
+                            {" "}
+
+                            {task.assigned_to || "None"}
+
+                          </div>
+
+                        </div>
+
+                        <div className="kanban-actions">
+
+                          {status !== "Pending" && (
+
+                            <button
+                              className="move-btn"
+                              onClick={()=>
+                                updateStatus(
+                                  task,
+                                  "Pending"
+                                )
+                              }
+                            >
+                              Pending
+                            </button>
+
+                          )}
+
+                          {status !== "In Progress" && (
+
+                            <button
+                              className="move-btn"
+                              onClick={()=>
+                                updateStatus(
+                                  task,
+                                  "In Progress"
+                                )
+                              }
+                            >
+                              In Progress
+                            </button>
+
+                          )}
+
+                          {status !== "Completed" && (
+
+                            <button
+                              className="move-btn"
+                              onClick={()=>
+                                updateStatus(
+                                  task,
+                                  "Completed"
+                                )
+                              }
+                            >
+                              Completed
+                            </button>
+
+                          )}
+
+                        </div>
+
                       </div>
 
-                    </div>
+                    ))
 
-                    <p>
-                      {task.description}
-                    </p>
+                  }
 
-                    <div className="kanban-meta">
-
-                      <div>
-
-                        <strong>
-                          Project:
-                        </strong>
-
-                        {" "}
-
-                        {task.project_title || "None"}
-
-                      </div>
-
-                      <div>
-
-                        <strong>
-                          Team:
-                        </strong>
-
-                        {" "}
-
-                        {task.team_name || "None"}
-
-                      </div>
-
-                      <div>
-
-                        <strong>
-                          Assigned:
-                        </strong>
-
-                        {" "}
-
-                        {task.assigned_to || "None"}
-
-                      </div>
-
-                    </div>
-
-                    <div className="kanban-actions">
-
-                      {status !== "Pending" && (
-
-                        <button
-                          className="move-btn"
-                          onClick={()=>
-                            updateStatus(
-                              task,
-                              "Pending"
-                            )
-                          }
-                        >
-                          Pending
-                        </button>
-
-                      )}
-
-                      {status !== "In Progress" && (
-
-                        <button
-                          className="move-btn"
-                          onClick={()=>
-                            updateStatus(
-                              task,
-                              "In Progress"
-                            )
-                          }
-                        >
-                          In Progress
-                        </button>
-
-                      )}
-
-                      {status !== "Completed" && (
-
-                        <button
-                          className="move-btn"
-                          onClick={()=>
-                            updateStatus(
-                              task,
-                              "Completed"
-                            )
-                          }
-                        >
-                          Completed
-                        </button>
-
-                      )}
-
-                    </div>
-
-                  </div>
-
-                ))}
+                </div>
 
               </div>
 
-            </div>
+            ))
 
-          ))}
+          }
 
         </div>
 
@@ -265,6 +291,6 @@ export default function Kanban(){
 
     </div>
 
-  )
+  );
 
 }

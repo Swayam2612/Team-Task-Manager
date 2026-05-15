@@ -1,5 +1,3 @@
-// frontend/src/pages/TeamDetails.jsx
-
 import {
   useEffect,
   useState
@@ -52,12 +50,12 @@ export default function TeamDetails(){
       );
 
       setTeam(
-        res.data
+        res.data || null
       );
 
       /* LINKED PROJECT */
 
-      if(res.data.project_id){
+      if(res.data?.project_id){
 
         const projectRes =
         await api.get(
@@ -65,7 +63,7 @@ export default function TeamDetails(){
         );
 
         setProject(
-          projectRes.data
+          projectRes.data || null
         );
 
         /* FETCH RELATED TASKS */
@@ -73,8 +71,14 @@ export default function TeamDetails(){
         const tasksRes =
         await api.get("/tasks");
 
+        const safeTasks =
+
+          Array.isArray(tasksRes.data)
+          ? tasksRes.data
+          : [];
+
         const filteredTasks =
-        tasksRes.data.filter(task=>
+        safeTasks.filter(task=>
 
           String(task.project_id)
           ===
@@ -86,11 +90,17 @@ export default function TeamDetails(){
           filteredTasks
         );
 
+      }else{
+
+        setTasks([]);
+
       }
 
     }catch(err){
 
       console.log(err);
+
+      setTasks([]);
 
     }
 
@@ -112,12 +122,15 @@ export default function TeamDetails(){
 
       </div>
 
-    )
+    );
 
   }
 
   const completedTasks =
-  (Array.isArray(tasks) ? tasks : []).filter(task=>
+  (Array.isArray(tasks)
+    ? tasks
+    : []
+  ).filter(task=>
 
     task.status === "Completed"
 
@@ -291,7 +304,10 @@ export default function TeamDetails(){
 
           ) : (
 
-            (Array.isArray(tasks) ? tasks : [])map(task=>(
+            (Array.isArray(tasks)
+              ? tasks
+              : []
+            ).map((task)=>(
 
               <Link
                 to={`/tasks/${task.id}`}
@@ -387,6 +403,6 @@ export default function TeamDetails(){
 
     </div>
 
-  )
+  );
 
 }

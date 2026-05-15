@@ -441,7 +441,7 @@ export default function Tasks(){
                   Select Team
                 </option>
 
-                {(Array.isArray(teams) ? teams : [])map(team=>(
+                {(Array.isArray(teams) ? teams : []).map(team=>(
 
                   <option
                     key={team.id}
@@ -484,7 +484,7 @@ export default function Tasks(){
 
           ) : (
 
-            (Array.isArray(tasks) ? tasks : [])map(task=>(
+            (Array.isArray(teams) ? teams : []).map(team=>(
 
               <Link
                 to={`/tasks/${task.id}`}

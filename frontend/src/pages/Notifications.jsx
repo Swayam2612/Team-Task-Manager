@@ -30,12 +30,18 @@ export default function Notifications(){
       );
 
       setNotifications(
-        res.data
+
+        Array.isArray(res.data)
+        ? res.data
+        : []
+
       );
 
     }catch(err){
 
       console.log(err);
+
+      setNotifications([]);
 
     }
 
@@ -81,47 +87,54 @@ export default function Notifications(){
 
         <div className="notifications-list">
 
-          {(Array.isArray(notifications) ? notifications : []).map(
+          {
 
-            <div
-              className={`notification-card ${
-                notification.is_read
-                ? "read"
-                : ""
-              }`}
-              key={notification.id}
-            >
+            (Array.isArray(notifications)
+              ? notifications
+              : []
+            ).map((notification)=>(
 
-              <div>
+              <div
+                className={`notification-card ${
+                  notification.is_read
+                  ? "read"
+                  : ""
+                }`}
+                key={notification.id}
+              >
 
-                <h3>
-                  {notification.message}
-                </h3>
+                <div>
 
-                <p>
-                  {notification.created_at}
-                </p>
+                  <h3>
+                    {notification.message}
+                  </h3>
+
+                  <p>
+                    {notification.created_at}
+                  </p>
+
+                </div>
+
+                {!notification.is_read && (
+
+                  <button
+                    className="primary-btn"
+                    onClick={()=>
+                      markAsRead(
+                        notification.id
+                      )
+                    }
+                  >
+                    Mark as Read
+                  </button>
+
+                )}
 
               </div>
 
-              {!notification.is_read && (
+            ))
 
-                <button
-                  className="primary-btn"
-                  onClick={()=>
-                    markAsRead(
-                      notification.id
-                    )
-                  }
-                >
-                  Mark as Read
-                </button>
-
-              )}
-
-            </div>
-
-          ))}
+          }
 
         </div>
 
@@ -129,6 +142,6 @@ export default function Notifications(){
 
     </div>
 
-  )
+  );
 
 }
