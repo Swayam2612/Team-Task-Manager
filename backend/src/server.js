@@ -1,9 +1,6 @@
 const express =
 require("express");
 
-const cors =
-require("cors");
-
 const app =
 express();
 
@@ -14,40 +11,35 @@ express();
 require("./db/database");
 
 /* =========================
-   CORS
+   MANUAL CORS FIX
 ========================= */
 
-app.use(
+app.use((req,res,next)=>{
 
-  cors({
+  res.header(
+    "Access-Control-Allow-Origin",
+    "*"
+  );
 
-    origin:[
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
 
-      "https://task-team-manager.up.railway.app",
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
 
-      "http://localhost:5173"
+  if(req.method === "OPTIONS"){
 
-    ],
+    return res.sendStatus(200);
 
-    methods:[
+  }
 
-      "GET",
+  next();
 
-      "POST",
-
-      "PUT",
-
-      "DELETE",
-
-      "OPTIONS"
-
-    ],
-
-    credentials:true
-
-  })
-
-);
+});
 
 /* =========================
    MIDDLEWARE
