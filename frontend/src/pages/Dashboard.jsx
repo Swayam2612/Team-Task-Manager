@@ -105,19 +105,19 @@ useLocation();
 
 };
   const completed =
-  tasks.filter(
+  (Array.isArray(tasks) ? tasks : []).filter(
     task =>
     task.status === "Completed"
   ).length;
 
   const pending =
-  tasks.filter(
+  (Array.isArray(tasks) ? tasks : []).filter(
     task =>
     task.status === "Pending"
   ).length;
 
   const progress =
-  tasks.filter(
+  (Array.isArray(tasks) ? tasks : []).filter(
     task =>
     task.status === "In Progress"
   ).length;

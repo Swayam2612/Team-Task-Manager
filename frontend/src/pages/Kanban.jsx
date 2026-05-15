@@ -67,7 +67,7 @@ export default function Kanban(){
 
   const getTasks = (status)=>{
 
-    return tasks.filter(
+    return (Array.isArray(tasks) ? tasks : []).filter(
       task =>
       task.status === status
     );

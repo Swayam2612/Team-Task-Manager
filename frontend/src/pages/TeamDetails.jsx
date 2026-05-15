@@ -117,7 +117,7 @@ export default function TeamDetails(){
   }
 
   const completedTasks =
-  tasks.filter(task=>
+  (Array.isArray(tasks) ? tasks : []).filter(task=>
 
     task.status === "Completed"
 

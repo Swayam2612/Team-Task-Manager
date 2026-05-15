@@ -60,7 +60,7 @@ await api.get(
   };
 
   const selectedTasks =
-  tasks.filter(task=>{
+  (Array.isArray(tasks) ? tasks : []).filter(task=>{
 
     if(!task.deadline)
       return false;
@@ -80,7 +80,7 @@ await api.get(
   });
 
   const overdueTasks =
-  tasks.filter(task=>{
+  (Array.isArray(tasks) ? tasks : []).filter(task=>{
 
     if(!task.deadline)
       return false;
