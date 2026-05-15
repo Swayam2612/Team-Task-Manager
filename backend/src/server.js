@@ -11,21 +11,53 @@ express();
 
 require("./db/database");
 
-/* MIDDLEWARE */
+/* =========================
+   CORS
+========================= */
 
 app.use(
 
   cors({
 
-    origin:"https://task-team-manager.up.railway.app",
+    origin:[
+
+      "https://task-team-manager.up.railway.app",
+
+      "http://localhost:5173"
+
+    ],
+
+    methods:[
+
+      "GET",
+
+      "POST",
+
+      "PUT",
+
+      "DELETE",
+
+      "OPTIONS"
+
+    ],
 
     credentials:true
+
   })
+
 );
+
+app.options("*", cors());
+
+/* =========================
+   MIDDLEWARE
+========================= */
 
 app.use(express.json());
 
-/* ROUTES */
+/* =========================
+   ROUTES
+========================= */
 
 const authRoutes =
 require("./routes/authRoutes");
@@ -51,7 +83,9 @@ require("./routes/attachmentRoutes");
 const notificationRoutes =
 require("./routes/notificationRoutes");
 
-/* API ROUTES */
+/* =========================
+   API ROUTES
+========================= */
 
 app.use(
   "/api/auth",
@@ -93,9 +127,11 @@ app.use(
   notificationRoutes
 );
 
-/* HEALTH CHECK */
+/* =========================
+   HEALTH CHECK
+========================= */
 
-app.get("/", (req, res) => {
+app.get("/",(req,res)=>{
 
   res.send(
     "Team Task Manager API Running"
@@ -103,12 +139,14 @@ app.get("/", (req, res) => {
 
 });
 
-/* SERVER */
+/* =========================
+   SERVER
+========================= */
 
 const PORT =
 process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT,()=>{
 
   console.log(
     `Server running on ${PORT}`
