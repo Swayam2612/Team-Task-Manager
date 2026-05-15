@@ -1,22 +1,6 @@
 const router =
 require("express").Router();
 
-const cors =
-require("cors");
-
-router.use(
-
-  cors({
-
-    origin:
-    "https://task-team-manager.up.railway.app",
-
-    credentials:true
-
-  })
-
-);
-
 const db =
 require("../db/database");
 
@@ -38,6 +22,8 @@ router.post("/signup",(req,res)=>{
 
   } = req.body;
 
+  /* VALIDATION */
+
   if(
 
     !name ||
@@ -53,11 +39,13 @@ router.post("/signup",(req,res)=>{
       .json({
 
         error:
-        "All fields required"
+        "All fields are required"
 
       });
 
   }
+
+  /* CHECK EXISTING USER */
 
   db.get(
     `
@@ -98,6 +86,8 @@ router.post("/signup",(req,res)=>{
 
       }
 
+      /* CREATE USER */
+
       db.run(
         `
         INSERT INTO users(
@@ -136,7 +126,7 @@ router.post("/signup",(req,res)=>{
               .json({
 
                 error:
-                "Failed to create account"
+                "Failed to create user"
 
               });
 
@@ -182,6 +172,8 @@ router.post("/login",(req,res)=>{
     password
 
   } = req.body;
+
+  /* VALIDATION */
 
   if(
 

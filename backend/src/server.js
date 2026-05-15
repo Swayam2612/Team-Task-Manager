@@ -7,7 +7,9 @@ require("cors");
 const app =
 express();
 
-/* DATABASE */
+/* =========================
+   DATABASE
+========================= */
 
 require("./db/database");
 
@@ -46,11 +48,6 @@ app.use(
   })
 
 );
-
-app.options("*", cors({
-  origin:"https://task-team-manager.up.railway.app",
-  credentials:true
-}));
 
 /* =========================
    MIDDLEWARE
@@ -149,10 +146,18 @@ app.get("/",(req,res)=>{
 const PORT =
 process.env.PORT || 5000;
 
-app.listen(PORT,()=>{
+app.listen(
 
-  console.log(
-    `Server running on ${PORT}`
-  );
+  PORT,
 
-});
+  "0.0.0.0",
+
+  ()=>{
+
+    console.log(
+      `Server running on ${PORT}`
+    );
+
+  }
+
+);
