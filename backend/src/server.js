@@ -13,7 +13,15 @@ require("./db/database");
 
 /* MIDDLEWARE */
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://invigorating-youth-production.up.railway.app"
+    ],
+    credentials: true
+  })
+);
 
 app.use(express.json());
 
@@ -87,7 +95,7 @@ app.use(
 
 /* HEALTH CHECK */
 
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
 
   res.send(
     "Team Task Manager API Running"
@@ -97,9 +105,10 @@ app.get("/",(req,res)=>{
 
 /* SERVER */
 
-const PORT = 5000;
+const PORT =
+process.env.PORT || 5000;
 
-app.listen(PORT,()=>{
+app.listen(PORT, () => {
 
   console.log(
     `Server running on ${PORT}`
