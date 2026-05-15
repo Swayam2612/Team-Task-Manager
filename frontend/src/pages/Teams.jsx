@@ -260,7 +260,7 @@ export default function Teams(){
                   Choose Project
                 </option>
 
-                {projects.map(project=>(
+                {(Array.isArray(projects) ? projects : [])map(project=>(
 
                   <option
                     key={project.id}
@@ -303,7 +303,7 @@ export default function Teams(){
 
           ) : (
 
-            teams.map(team=>(
+            (Array.isArray(teams) ? teams : [])map(team=>(
 
               <Link
                 to={`/teams/${team.id}`}

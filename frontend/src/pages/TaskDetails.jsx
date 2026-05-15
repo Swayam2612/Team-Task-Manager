@@ -371,7 +371,7 @@ export default function TaskDetails(){
 
             ) : (
 
-              task.comments.map(
+              (Array.isArray(task.comments) ? task.comments : []).map(
                 (comment,index)=>(
 
                 <div
@@ -442,7 +442,7 @@ export default function TaskDetails(){
 
             ) : (
 
-              task.attachments.map(
+              (Array.isArray(task.attachments) ? task.attachments : []).map(
                 (link,index)=>(
 
                 <div

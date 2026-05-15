@@ -291,7 +291,7 @@ export default function TeamDetails(){
 
           ) : (
 
-            tasks.map(task=>(
+            (Array.isArray(tasks) ? tasks : [])map(task=>(
 
               <Link
                 to={`/tasks/${task.id}`}

@@ -106,7 +106,7 @@ export default function Kanban(){
 
         <div className="kanban-board">
 
-          {statuses.map(status=>(
+          {(Array.isArray(statuses) ? statuses : []).map(
 
             <div
               className="kanban-column"
@@ -132,7 +132,7 @@ export default function Kanban(){
 
               <div className="kanban-tasks">
 
-                {getTasks(status).map(task=>(
+                {(Array.isArray(getTasks(status)) ? getTasks(status) : []).map(
 
                   <div
                     className="kanban-card"

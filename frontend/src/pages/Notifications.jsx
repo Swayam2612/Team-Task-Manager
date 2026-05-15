@@ -81,7 +81,7 @@ export default function Notifications(){
 
         <div className="notifications-list">
 
-          {notifications.map(notification=>(
+          {(Array.isArray(notifications) ? notifications : []).map(
 
             <div
               className={`notification-card ${

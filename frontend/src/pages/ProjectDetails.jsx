@@ -307,7 +307,7 @@ export default function ProjectDetails(){
 
             ) : (
 
-              tasks.map(task=>(
+              (Array.isArray(tasks) ? tasks : []).map(task=>(
 
                 <Link
                   to={`/tasks/${task.id}`}
@@ -362,7 +362,7 @@ export default function ProjectDetails(){
 
             ) : (
 
-              teams.map(team=>(
+              (Array.isArray(teams) ? teams : []).map(team=>(
 
                 <Link
                   to={`/teams/${team.id}`}

@@ -73,7 +73,7 @@ export default function Tasks(){
       );
 
       const formatted =
-      res.data.map(task=>({
+      (Array.isArray(res.data) ? res.data : []).map(task=>({
 
         ...task,
 
@@ -406,7 +406,7 @@ export default function Tasks(){
                   Select Project
                 </option>
 
-                {projects.map(project=>(
+                {(Array.isArray(projects) ? projects : []).map(project=>(
 
                   <option
                     key={project.id}
@@ -441,7 +441,7 @@ export default function Tasks(){
                   Select Team
                 </option>
 
-                {teams.map(team=>(
+                {(Array.isArray(teams) ? teams : [])map(team=>(
 
                   <option
                     key={team.id}
@@ -484,7 +484,7 @@ export default function Tasks(){
 
           ) : (
 
-            tasks.map(task=>(
+            (Array.isArray(tasks) ? tasks : [])map(task=>(
 
               <Link
                 to={`/tasks/${task.id}`}

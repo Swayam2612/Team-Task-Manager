@@ -265,7 +265,7 @@ useLocation();
                     outerRadius={120}
                   >
 
-                    {chartData.map(
+                    {(Array.isArray(chartData) ? chartData : []).map(
                       (entry,index)=>(
 
                         <Cell

@@ -267,7 +267,7 @@ export default function Projects(){
 
           ) : (
 
-            projects.map(project=>(
+            (Array.isArray(projects) ? projects : []).map(project=>(
 
               <div
                 className="project-card"
