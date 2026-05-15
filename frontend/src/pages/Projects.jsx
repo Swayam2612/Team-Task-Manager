@@ -41,13 +41,31 @@ export default function Projects(){
 
     try{
 
-      const user = JSON.parse(
+      let user = {};
 
-        localStorage.getItem(
-          "user"
-        )
+      try{
 
-      );
+        user = JSON.parse(
+
+          localStorage.getItem(
+            "user"
+          ) || "{}"
+
+        );
+
+      }catch(err){
+
+        console.log(err);
+
+      }
+
+      if(!user?.id){
+
+        setProjects([]);
+
+        return;
+
+      }
 
       const res =
       await api.get(
@@ -57,12 +75,18 @@ export default function Projects(){
       );
 
       setProjects(
-        res.data
+
+        Array.isArray(res.data)
+        ? res.data
+        : []
+
       );
 
     }catch(err){
 
       console.log(err);
+
+      setProjects([]);
 
     }
 
@@ -93,13 +117,23 @@ export default function Projects(){
 
     try{
 
-      const user = JSON.parse(
+      let user = {};
 
-        localStorage.getItem(
-          "user"
-        )
+      try{
 
-      );
+        user = JSON.parse(
+
+          localStorage.getItem(
+            "user"
+          ) || "{}"
+
+        );
+
+      }catch(err){
+
+        console.log(err);
+
+      }
 
       const payload = {
 
@@ -112,8 +146,6 @@ export default function Projects(){
         deadline:formData.deadline
 
       };
-
-      console.log(payload);
 
       await api.post(
         "/projects",
@@ -256,84 +288,94 @@ export default function Projects(){
 
         <div className="projects-grid">
 
-          {projects.length === 0 ? (
+          {
 
-            <div className="empty-state">
+            (Array.isArray(projects)
+              ? projects
+              : []
+            ).length === 0 ? (
 
-              ✨ No projects yet.
-              Create your first project.
+              <div className="empty-state">
 
-            </div>
-
-          ) : (
-
-            (Array.isArray(projects) ? projects : []).map(project=>(
-
-              <div
-                className="project-card"
-                key={project.id}
-              >
-
-                <div className="task-top">
-
-                  <h2>
-                    {project.title}
-                  </h2>
-
-                  <button
-                    className="delete-btn"
-                    onClick={()=>
-                      deleteProject(
-                        project.id
-                      )
-                    }
-                  >
-                    Delete
-                  </button>
-
-                </div>
-
-                <p>
-                  {project.description}
-                </p>
-
-                <div
-                  className="task-meta"
-                  style={{
-                    marginTop:"16px"
-                  }}
-                >
-
-                  <span>
-
-                    Deadline:
-                    {" "}
-                    {project.deadline || "None"}
-
-                  </span>
-
-                </div>
-
-                <div
-                  style={{
-                    marginTop:"20px"
-                  }}
-                >
-
-                  <Link
-                    to={`/projects/${project.id}`}
-                    className="view-link"
-                  >
-                    View Details →
-                  </Link>
-
-                </div>
+                ✨ No projects yet.
+                Create your first project.
 
               </div>
 
-            ))
+            ) : (
 
-          )}
+              (Array.isArray(projects)
+                ? projects
+                : []
+              ).map((project)=>(
+
+                <div
+                  className="project-card"
+                  key={project.id}
+                >
+
+                  <div className="task-top">
+
+                    <h2>
+                      {project.title}
+                    </h2>
+
+                    <button
+                      className="delete-btn"
+                      onClick={()=>
+                        deleteProject(
+                          project.id
+                        )
+                      }
+                    >
+                      Delete
+                    </button>
+
+                  </div>
+
+                  <p>
+                    {project.description}
+                  </p>
+
+                  <div
+                    className="task-meta"
+                    style={{
+                      marginTop:"16px"
+                    }}
+                  >
+
+                    <span>
+
+                      Deadline:
+                      {" "}
+                      {project.deadline || "None"}
+
+                    </span>
+
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop:"20px"
+                    }}
+                  >
+
+                    <Link
+                      to={`/projects/${project.id}`}
+                      className="view-link"
+                    >
+                      View Details →
+                    </Link>
+
+                  </div>
+
+                </div>
+
+              ))
+
+            )
+
+          }
 
         </div>
 
@@ -341,6 +383,6 @@ export default function Projects(){
 
     </div>
 
-  )
+  );
 
 }

@@ -27,11 +27,19 @@ export default function Activity(){
       const res =
       await api.get("/activities");
 
-      setActivities(res.data);
+      setActivities(
+
+        Array.isArray(res.data)
+        ? res.data
+        : []
+
+      );
 
     }catch(err){
 
       console.log(err);
+
+      setActivities([]);
 
     }
 
@@ -59,42 +67,52 @@ export default function Activity(){
 
         <div className="activity-list">
 
-          {activities.length === 0 ? (
+          {
 
-            <div className="empty-state">
+            (Array.isArray(activities)
+              ? activities
+              : []
+            ).length === 0 ? (
 
-              No activity yet.
+              <div className="empty-state">
 
-            </div>
-
-          ) : (
-
-            activities.map(activity=>(
-
-              <div
-                className="activity-card"
-                key={activity.id}
-              >
-
-                <div className="activity-dot"/>
-
-                <div>
-
-                  <h3>
-                    {activity.message}
-                  </h3>
-
-                  <p>
-                    {activity.created_at}
-                  </p>
-
-                </div>
+                No activity yet.
 
               </div>
 
-            ))
+            ) : (
 
-          )}
+              (Array.isArray(activities)
+                ? activities
+                : []
+              ).map((activity)=>(
+
+                <div
+                  className="activity-card"
+                  key={activity.id}
+                >
+
+                  <div className="activity-dot"/>
+
+                  <div>
+
+                    <h3>
+                      {activity.message}
+                    </h3>
+
+                    <p>
+                      {activity.created_at}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              ))
+
+            )
+
+          }
 
         </div>
 
@@ -102,6 +120,6 @@ export default function Activity(){
 
     </div>
 
-  )
+  );
 
 }

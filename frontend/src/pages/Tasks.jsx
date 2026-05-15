@@ -1,5 +1,3 @@
-// frontend/src/pages/Tasks.jsx
-
 import {
   useEffect,
   useState
@@ -39,21 +37,35 @@ export default function Tasks(){
 
   });
 
-  const user = JSON.parse(
+  let user = {};
 
-    localStorage.getItem(
-      "user"
-    )
+  try{
 
-  );
+    user = JSON.parse(
+
+      localStorage.getItem(
+        "user"
+      ) || "{}"
+
+    );
+
+  }catch(err){
+
+    console.log(err);
+
+  }
 
   useEffect(()=>{
 
-    fetchTasks();
+    if(user?.id){
 
-    fetchProjects();
+      fetchTasks();
 
-    fetchTeams();
+      fetchProjects();
+
+      fetchTeams();
+
+    }
 
   },[]);
 
@@ -73,7 +85,10 @@ export default function Tasks(){
       );
 
       const formatted =
-      (Array.isArray(res.data) ? res.data : []).map(task=>({
+      (Array.isArray(res.data)
+        ? res.data
+        : []
+      ).map(task=>({
 
         ...task,
 
@@ -97,6 +112,8 @@ export default function Tasks(){
 
       console.log(err);
 
+      setTasks([]);
+
     }
 
   };
@@ -117,12 +134,18 @@ export default function Tasks(){
       );
 
       setProjects(
-        res.data
+
+        Array.isArray(res.data)
+        ? res.data
+        : []
+
       );
 
     }catch(err){
 
       console.log(err);
+
+      setProjects([]);
 
     }
 
@@ -144,12 +167,18 @@ export default function Tasks(){
       );
 
       setTeams(
-        res.data
+
+        Array.isArray(res.data)
+        ? res.data
+        : []
+
       );
 
     }catch(err){
 
       console.log(err);
+
+      setTeams([]);
 
     }
 
@@ -406,18 +435,25 @@ export default function Tasks(){
                   Select Project
                 </option>
 
-                {(Array.isArray(projects) ? projects : []).map(project=>(
+                {
 
-                  <option
-                    key={project.id}
-                    value={project.id}
-                  >
+                  (Array.isArray(projects)
+                    ? projects
+                    : []
+                  ).map((project)=>(
 
-                    {project.title}
+                    <option
+                      key={project.id}
+                      value={project.id}
+                    >
 
-                  </option>
+                      {project.title}
 
-                ))}
+                    </option>
+
+                  ))
+
+                }
 
               </select>
 
@@ -441,18 +477,25 @@ export default function Tasks(){
                   Select Team
                 </option>
 
-                {(Array.isArray(teams) ? teams : []).map(team=>(
+                {
 
-                  <option
-                    key={team.id}
-                    value={team.id}
-                  >
+                  (Array.isArray(teams)
+                    ? teams
+                    : []
+                  ).map((team)=>(
 
-                    {team.name}
+                    <option
+                      key={team.id}
+                      value={team.id}
+                    >
 
-                  </option>
+                      {team.name}
 
-                ))}
+                    </option>
+
+                  ))
+
+                }
 
               </select>
 
@@ -473,112 +516,122 @@ export default function Tasks(){
 
         <div className="tasks-grid">
 
-          {tasks.length === 0 ? (
+          {
 
-            <div className="empty-state">
+            (Array.isArray(tasks)
+              ? tasks
+              : []
+            ).length === 0 ? (
 
-              ✨ No tasks yet.
-              Create your first task.
+              <div className="empty-state">
 
-            </div>
+                ✨ No tasks yet.
+                Create your first task.
 
-          ) : (
+              </div>
 
-            (Array.isArray(teams) ? teams : []).map(team=>(
+            ) : (
 
-              <Link
-                to={`/tasks/${task.id}`}
-                key={task.id}
-              >
+              (Array.isArray(tasks)
+                ? tasks
+                : []
+              ).map((task)=>(
 
-                <div className="task-card">
+                <Link
+                  to={`/tasks/${task.id}`}
+                  key={task.id}
+                >
 
-                  <div className="task-top">
+                  <div className="task-card">
 
-                    <h2>
-                      {task.title}
-                    </h2>
+                    <div className="task-top">
 
-                    <button
-                      className="delete-btn"
-                      onClick={(e)=>{
+                      <h2>
+                        {task.title}
+                      </h2>
 
-                        e.preventDefault();
+                      <button
+                        className="delete-btn"
+                        onClick={(e)=>{
 
-                        deleteTask(task.id);
+                          e.preventDefault();
 
+                          deleteTask(task.id);
+
+                        }}
+                      >
+                        Delete
+                      </button>
+
+                    </div>
+
+                    <p>
+                      {task.description}
+                    </p>
+
+                    <div className="task-meta">
+
+                      <span>
+                        {task.priority}
+                      </span>
+
+                      <span>
+                        {task.status}
+                      </span>
+
+                    </div>
+
+                    <div
+                      className="task-meta"
+                      style={{
+                        marginTop:"10px"
                       }}
                     >
-                      Delete
-                    </button>
+
+                      {task.project_title && (
+
+                        <span>
+
+                          📁 {task.project_title}
+
+                        </span>
+
+                      )}
+
+                      {task.team_name && (
+
+                        <span>
+
+                          👥 {task.team_name}
+
+                        </span>
+
+                      )}
+
+                    </div>
+
+                    <div
+                      className="task-deadline"
+                      style={{
+                        marginTop:"14px"
+                      }}
+                    >
+
+                      Deadline:
+                      {" "}
+                      {task.deadline || "None"}
+
+                    </div>
 
                   </div>
 
-                  <p>
-                    {task.description}
-                  </p>
+                </Link>
 
-                  <div className="task-meta">
+              ))
 
-                    <span>
-                      {task.priority}
-                    </span>
+            )
 
-                    <span>
-                      {task.status}
-                    </span>
-
-                  </div>
-
-                  <div
-                    className="task-meta"
-                    style={{
-                      marginTop:"10px"
-                    }}
-                  >
-
-                    {task.project_title && (
-
-                      <span>
-
-                        📁 {task.project_title}
-
-                      </span>
-
-                    )}
-
-                    {task.team_name && (
-
-                      <span>
-
-                        👥 {task.team_name}
-
-                      </span>
-
-                    )}
-
-                  </div>
-
-                  <div
-                    className="task-deadline"
-                    style={{
-                      marginTop:"14px"
-                    }}
-                  >
-
-                    Deadline:
-                    {" "}
-                    {task.deadline || "None"}
-
-                  </div>
-
-                </div>
-
-              </Link>
-
-            ))
-
-          )}
+          }
 
         </div>
 
@@ -586,6 +639,6 @@ export default function Tasks(){
 
     </div>
 
-  )
+  );
 
 }

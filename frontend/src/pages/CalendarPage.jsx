@@ -1,5 +1,3 @@
-// frontend/src/pages/CalendarPage.jsx
-
 import {
   useEffect,
   useState
@@ -36,31 +34,50 @@ export default function CalendarPage(){
 
       const user = JSON.parse(
 
-  localStorage.getItem(
-    "user"
-  )
+        localStorage.getItem(
+          "user"
+        ) || "{}"
 
-);
+      );
 
-const res =
-await api.get(
+      if(!user?.id){
 
-  `/tasks?user_id=${user.id}`
+        setTasks([]);
 
-);
+        return;
 
-      setTasks(res.data);
+      }
+
+      const res =
+      await api.get(
+
+        `/tasks?user_id=${user.id}`
+
+      );
+
+      setTasks(
+
+        Array.isArray(res.data)
+        ? res.data
+        : []
+
+      );
 
     }catch(err){
 
       console.log(err);
+
+      setTasks([]);
 
     }
 
   };
 
   const selectedTasks =
-  (Array.isArray(tasks) ? tasks : []).filter(task=>{
+  (Array.isArray(tasks)
+    ? tasks
+    : []
+  ).filter(task=>{
 
     if(!task.deadline)
       return false;
@@ -80,7 +97,10 @@ await api.get(
   });
 
   const overdueTasks =
-  (Array.isArray(tasks) ? tasks : []).filter(task=>{
+  (Array.isArray(tasks)
+    ? tasks
+    : []
+  ).filter(task=>{
 
     if(!task.deadline)
       return false;
@@ -131,11 +151,13 @@ await api.get(
               tileContent={({date})=>{
 
                 const formattedDate =
-                date
-                  .toLocaleDateString("en-CA");
+                date.toLocaleDateString("en-CA");
 
                 const hasTask =
-                tasks.some(task=>{
+                (Array.isArray(tasks)
+                  ? tasks
+                  : []
+                ).some(task=>{
 
                   if(!task.deadline)
                     return false;
@@ -202,32 +224,39 @@ await api.get(
 
                 <div className="deadline-list">
 
-                  {selectedTasks.map(task=>(
+                  {
 
-                    <div
-                      className="deadline-card"
-                      key={task.id}
-                    >
+                    (Array.isArray(selectedTasks)
+                      ? selectedTasks
+                      : []
+                    ).map((task)=>(
 
-                      <h3>
-                        {task.title}
-                      </h3>
+                      <div
+                        className="deadline-card"
+                        key={task.id}
+                      >
 
-                      <p>
-                        {task.description}
-                      </p>
+                        <h3>
+                          {task.title}
+                        </h3>
 
-                      <p>
+                        <p>
+                          {task.description}
+                        </p>
 
-                        Deadline:
-                        {" "}
-                        {task.deadline}
+                        <p>
 
-                      </p>
+                          Deadline:
+                          {" "}
+                          {task.deadline}
 
-                    </div>
+                        </p>
 
-                  ))}
+                      </div>
+
+                    ))
+
+                  }
 
                 </div>
 
@@ -253,32 +282,39 @@ await api.get(
 
                 <div className="deadline-list">
 
-                  {overdueTasks.map(task=>(
+                  {
 
-                    <div
-                      className="deadline-card overdue"
-                      key={task.id}
-                    >
+                    (Array.isArray(overdueTasks)
+                      ? overdueTasks
+                      : []
+                    ).map((task)=>(
 
-                      <h3>
-                        {task.title}
-                      </h3>
+                      <div
+                        className="deadline-card overdue"
+                        key={task.id}
+                      >
 
-                      <p>
-                        {task.description}
-                      </p>
+                        <h3>
+                          {task.title}
+                        </h3>
 
-                      <p>
+                        <p>
+                          {task.description}
+                        </p>
 
-                        Deadline:
-                        {" "}
-                        {task.deadline}
+                        <p>
 
-                      </p>
+                          Deadline:
+                          {" "}
+                          {task.deadline}
 
-                    </div>
+                        </p>
 
-                  ))}
+                      </div>
+
+                    ))
+
+                  }
 
                 </div>
 
@@ -294,6 +330,6 @@ await api.get(
 
     </div>
 
-  )
+  );
 
 }

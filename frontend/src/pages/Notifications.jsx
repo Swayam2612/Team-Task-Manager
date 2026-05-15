@@ -65,6 +65,12 @@ export default function Notifications(){
 
   };
 
+  const safeNotifications =
+
+    Array.isArray(notifications)
+    ? notifications
+    : [];
+
   return(
 
     <div>
@@ -89,50 +95,59 @@ export default function Notifications(){
 
           {
 
-            (Array.isArray(notifications)
-              ? notifications
-              : []
-            ).map((notification)=>(
+            safeNotifications.length === 0 ? (
 
-              <div
-                className={`notification-card ${
-                  notification.is_read
-                  ? "read"
-                  : ""
-                }`}
-                key={notification.id}
-              >
+              <div className="empty-state">
 
-                <div>
-
-                  <h3>
-                    {notification.message}
-                  </h3>
-
-                  <p>
-                    {notification.created_at}
-                  </p>
-
-                </div>
-
-                {!notification.is_read && (
-
-                  <button
-                    className="primary-btn"
-                    onClick={()=>
-                      markAsRead(
-                        notification.id
-                      )
-                    }
-                  >
-                    Mark as Read
-                  </button>
-
-                )}
+                No notifications available.
 
               </div>
 
-            ))
+            ) : (
+
+              safeNotifications.map((notification)=>(
+
+                <div
+                  className={`notification-card ${
+                    notification?.is_read
+                    ? "read"
+                    : ""
+                  }`}
+                  key={notification?.id}
+                >
+
+                  <div>
+
+                    <h3>
+                      {notification?.message || "No message"}
+                    </h3>
+
+                    <p>
+                      {notification?.created_at || "No date"}
+                    </p>
+
+                  </div>
+
+                  {!notification?.is_read && (
+
+                    <button
+                      className="primary-btn"
+                      onClick={()=>
+                        markAsRead(
+                          notification?.id
+                        )
+                      }
+                    >
+                      Mark as Read
+                    </button>
+
+                  )}
+
+                </div>
+
+              ))
+
+            )
 
           }
 

@@ -8,10 +8,25 @@ export default function Navbar(){
   const navigate =
   useNavigate();
 
-  const user =
-  JSON.parse(
-    localStorage.getItem("user")
-  );
+  /* SAFE USER PARSE */
+
+  let user = null;
+
+  try{
+
+    user = JSON.parse(
+      localStorage.getItem("user")
+    );
+
+  }catch(err){
+
+    console.log(err);
+
+    user = null;
+
+  }
+
+  /* LOGOUT */
 
   const logout = ()=>{
 
@@ -95,6 +110,6 @@ export default function Navbar(){
 
     </div>
 
-  )
+  );
 
 }

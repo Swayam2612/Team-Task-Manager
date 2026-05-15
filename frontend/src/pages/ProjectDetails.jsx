@@ -1,5 +1,3 @@
-// frontend/src/pages/ProjectDetails.jsx
-
 import {
   useEffect,
   useState
@@ -52,7 +50,7 @@ export default function ProjectDetails(){
       );
 
       setProject(
-        res.data
+        res.data || null
       );
 
       /* TASKS */
@@ -61,13 +59,17 @@ export default function ProjectDetails(){
       await api.get("/tasks");
 
       const filteredTasks =
-      tasksRes.data.filter(task=>
 
-        String(task.project_id)
-        ===
-        String(id)
+        (Array.isArray(tasksRes.data)
+          ? tasksRes.data
+          : []
+        ).filter(task=>
 
-      );
+          String(task.project_id)
+          ===
+          String(id)
+
+        );
 
       setTasks(
         filteredTasks
@@ -79,13 +81,17 @@ export default function ProjectDetails(){
       await api.get("/teams");
 
       const filteredTeams =
-      teamsRes.data.filter(team=>
 
-        String(team.project_id)
-        ===
-        String(id)
+        (Array.isArray(teamsRes.data)
+          ? teamsRes.data
+          : []
+        ).filter(team=>
 
-      );
+          String(team.project_id)
+          ===
+          String(id)
+
+        );
 
       setTeams(
         filteredTeams
@@ -94,6 +100,9 @@ export default function ProjectDetails(){
     }catch(err){
 
       console.log(err);
+
+      setTasks([]);
+      setTeams([]);
 
     }
 
@@ -115,12 +124,15 @@ export default function ProjectDetails(){
 
       </div>
 
-    )
+    );
 
   }
 
   const completedTasks =
-  (Array.isArray(tasks) ? tasks : []).filter(task=>
+  (Array.isArray(tasks)
+    ? tasks
+    : []
+  ).filter(task=>
 
     task.status === "Completed"
 
@@ -128,7 +140,10 @@ export default function ProjectDetails(){
 
   const progressPercentage =
 
-    tasks.length === 0
+    (Array.isArray(tasks)
+      ? tasks
+      : []
+    ).length === 0
 
     ? 0
 
@@ -137,7 +152,11 @@ export default function ProjectDetails(){
         (
           completedTasks
           /
-          tasks.length
+          (Array.isArray(tasks)
+            ? tasks
+            : []
+          ).length
+
         ) * 100
 
       );
@@ -202,7 +221,13 @@ export default function ProjectDetails(){
 
               Tasks:
               {" "}
-              {tasks.length}
+
+              {
+                (Array.isArray(tasks)
+                  ? tasks
+                  : []
+                ).length
+              }
 
             </span>
 
@@ -210,7 +235,13 @@ export default function ProjectDetails(){
 
               Teams:
               {" "}
-              {teams.length}
+
+              {
+                (Array.isArray(teams)
+                  ? teams
+                  : []
+                ).length
+              }
 
             </span>
 
@@ -297,46 +328,56 @@ export default function ProjectDetails(){
 
             </div>
 
-            {tasks.length === 0 ? (
+            {
 
-              <div className="empty-state">
+              (Array.isArray(tasks)
+                ? tasks
+                : []
+              ).length === 0 ? (
 
-                ✨ No tasks linked.
+                <div className="empty-state">
 
-              </div>
+                  ✨ No tasks linked.
 
-            ) : (
+                </div>
 
-              (Array.isArray(tasks) ? tasks : []).map(task=>(
+              ) : (
 
-                <Link
-                  to={`/tasks/${task.id}`}
-                  key={task.id}
-                >
+                (Array.isArray(tasks)
+                  ? tasks
+                  : []
+                ).map((task)=>(
 
-                  <div className="dashboard-item">
+                  <Link
+                    to={`/tasks/${task.id}`}
+                    key={task.id}
+                  >
 
-                    <h3>
-                      {task.title}
-                    </h3>
+                    <div className="dashboard-item">
 
-                    <p>
+                      <h3>
+                        {task.title}
+                      </h3>
 
-                      {task.priority}
+                      <p>
 
-                      {" • "}
+                        {task.priority}
 
-                      {task.status}
+                        {" • "}
 
-                    </p>
+                        {task.status}
 
-                  </div>
+                      </p>
 
-                </Link>
+                    </div>
 
-              ))
+                  </Link>
 
-            )}
+                ))
+
+              )
+
+            }
 
           </div>
 
@@ -352,40 +393,50 @@ export default function ProjectDetails(){
 
             </div>
 
-            {teams.length === 0 ? (
+            {
 
-              <div className="empty-state">
+              (Array.isArray(teams)
+                ? teams
+                : []
+              ).length === 0 ? (
 
-                ✨ No teams linked.
+                <div className="empty-state">
 
-              </div>
+                  ✨ No teams linked.
 
-            ) : (
+                </div>
 
-              (Array.isArray(teams) ? teams : []).map(team=>(
+              ) : (
 
-                <Link
-                  to={`/teams/${team.id}`}
-                  key={team.id}
-                >
+                (Array.isArray(teams)
+                  ? teams
+                  : []
+                ).map((team)=>(
 
-                  <div className="dashboard-item">
+                  <Link
+                    to={`/teams/${team.id}`}
+                    key={team.id}
+                  >
 
-                    <h3>
-                      {team.name}
-                    </h3>
+                    <div className="dashboard-item">
 
-                    <p>
-                      {team.description || "No description"}
-                    </p>
+                      <h3>
+                        {team.name}
+                      </h3>
 
-                  </div>
+                      <p>
+                        {team.description || "No description"}
+                      </p>
 
-                </Link>
+                    </div>
 
-              ))
+                  </Link>
 
-            )}
+                ))
+
+              )
+
+            }
 
           </div>
 
@@ -395,6 +446,6 @@ export default function ProjectDetails(){
 
     </div>
 
-  )
+  );
 
 }

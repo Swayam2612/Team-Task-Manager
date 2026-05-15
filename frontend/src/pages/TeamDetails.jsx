@@ -14,85 +14,96 @@ from "../components/Navbar";
 import api
 from "../services/api";
 
-export default function TeamDetails(){
+export default function TaskDetails(){
 
   const {id} =
   useParams();
 
-  const [team,setTeam] =
+  const [task,setTask] =
   useState(null);
 
   const [project,setProject] =
   useState(null);
 
-  const [tasks,setTasks] =
-  useState([]);
+  const [comment,setComment] =
+  useState("");
+
+  const [attachment,setAttachment] =
+  useState("");
 
   useEffect(()=>{
 
-    fetchTeamData();
+    fetchTaskData();
 
   },[]);
 
   /* =========================
-     FETCH TEAM DATA
+     FETCH TASK DATA
   ========================= */
 
-  const fetchTeamData = async()=>{
+  const fetchTaskData = async()=>{
 
     try{
 
-      /* TEAM */
-
       const res =
       await api.get(
-        `/teams/${id}`
+        `/tasks/${id}`
       );
 
-      setTeam(
-        res.data || null
+      const formatted = {
+
+        ...res.data,
+
+        comments:(()=>{
+
+          try{
+
+            return res.data.comments
+            ? JSON.parse(res.data.comments)
+            : [];
+
+          }catch{
+
+            return [];
+
+          }
+
+        })(),
+
+        attachments:(()=>{
+
+          try{
+
+            return res.data.attachments
+            ? JSON.parse(res.data.attachments)
+            : [];
+
+          }catch{
+
+            return [];
+
+          }
+
+        })()
+
+      };
+
+      setTask(
+        formatted
       );
 
-      /* LINKED PROJECT */
+      /* FETCH PROJECT */
 
-      if(res.data?.project_id){
+      if(formatted.project_id){
 
         const projectRes =
         await api.get(
-          `/projects/${res.data.project_id}`
+          `/projects/${formatted.project_id}`
         );
 
         setProject(
           projectRes.data || null
         );
-
-        /* FETCH RELATED TASKS */
-
-        const tasksRes =
-        await api.get("/tasks");
-
-        const safeTasks =
-
-          Array.isArray(tasksRes.data)
-          ? tasksRes.data
-          : [];
-
-        const filteredTasks =
-        safeTasks.filter(task=>
-
-          String(task.project_id)
-          ===
-          String(res.data.project_id)
-
-        );
-
-        setTasks(
-          filteredTasks
-        );
-
-      }else{
-
-        setTasks([]);
 
       }
 
@@ -100,13 +111,98 @@ export default function TeamDetails(){
 
       console.log(err);
 
-      setTasks([]);
+      setTask(null);
 
     }
 
   };
 
-  if(!team){
+  /* =========================
+     ADD COMMENT
+  ========================= */
+
+  const addComment = async()=>{
+
+    try{
+
+      const updatedComments = [
+
+        ...(Array.isArray(task.comments)
+          ? task.comments
+          : []
+        ),
+
+        comment
+
+      ];
+
+      await api.put(
+        `/tasks/${id}`,
+        {
+
+          ...task,
+
+          comments:updatedComments
+
+        }
+      );
+
+      setComment("");
+
+      fetchTaskData();
+
+    }catch(err){
+
+      console.log(err);
+
+    }
+
+  };
+
+  /* =========================
+     ADD ATTACHMENT
+  ========================= */
+
+  const addAttachment = async()=>{
+
+    try{
+
+      const updatedAttachments = [
+
+        ...(Array.isArray(task.attachments)
+          ? task.attachments
+          : []
+        ),
+
+        attachment
+
+      ];
+
+      await api.put(
+        `/tasks/${id}`,
+        {
+
+          ...task,
+
+          attachments:
+          updatedAttachments
+
+        }
+      );
+
+      setAttachment("");
+
+      fetchTaskData();
+
+    }catch(err){
+
+      console.log(err);
+
+    }
+
+  };
+
+  if(!task){
 
     return(
 
@@ -126,32 +222,6 @@ export default function TeamDetails(){
 
   }
 
-  const completedTasks =
-  (Array.isArray(tasks)
-    ? tasks
-    : []
-  ).filter(task=>
-
-    task.status === "Completed"
-
-  ).length;
-
-  const productivity =
-
-    tasks.length === 0
-
-    ? 0
-
-    : Math.round(
-
-        (
-          completedTasks
-          /
-          tasks.length
-        ) * 100
-
-      );
-
   return(
 
     <div>
@@ -165,21 +235,21 @@ export default function TeamDetails(){
         <div className="page-header">
 
           <h1>
-            {team.name}
+            {task.title}
           </h1>
 
           <p>
-            Team collaboration workspace and productivity overview.
+            Complete task workspace and collaboration details.
           </p>
 
         </div>
 
-        {/* TEAM OVERVIEW */}
+        {/* TASK OVERVIEW */}
 
         <div className="dashboard-card">
 
           <h2>
-            Team Overview
+            Task Overview
           </h2>
 
           <p
@@ -189,7 +259,7 @@ export default function TeamDetails(){
             }}
           >
 
-            {team.description || "No description"}
+            {task.description || "No description"}
 
           </p>
 
@@ -201,26 +271,18 @@ export default function TeamDetails(){
           >
 
             <span>
+              {task.priority}
+            </span>
 
-              Tasks:
-              {" "}
-              {tasks.length}
-
+            <span>
+              {task.status}
             </span>
 
             <span>
 
-              Completed:
+              Deadline:
               {" "}
-              {completedTasks}
-
-            </span>
-
-            <span>
-
-              Productivity:
-              {" "}
-              {productivity}%
+              {task.deadline || "None"}
 
             </span>
 
@@ -277,123 +339,183 @@ export default function TeamDetails(){
 
         </div>
 
-        {/* TEAM TASKS */}
+        {/* GRID */}
 
         <div
-          className="dashboard-card"
+          className="dashboard-grid"
           style={{
             marginTop:"24px"
           }}
         >
 
-          <div className="card-header">
+          {/* COMMENTS */}
 
-            <h2>
-              Team Tasks
-            </h2>
+          <div className="dashboard-card">
 
-          </div>
+            <div className="card-header">
 
-          {tasks.length === 0 ? (
-
-            <div className="empty-state">
-
-              ✨ No tasks linked.
+              <h2>
+                Comments
+              </h2>
 
             </div>
 
-          ) : (
+            <div
+              style={{
+                marginBottom:"18px"
+              }}
+            >
 
-            (Array.isArray(tasks)
-              ? tasks
-              : []
-            ).map((task)=>(
+              <input
+                value={comment}
+                onChange={(e)=>
+                  setComment(
+                    e.target.value
+                  )
+                }
+                placeholder="Add comment"
+                style={{
+                  width:"100%",
+                  marginBottom:"12px"
+                }}
+              />
 
-              <Link
-                to={`/tasks/${task.id}`}
-                key={task.id}
+              <button
+                className="primary-btn"
+                onClick={addComment}
               >
+                Add Comment
+              </button>
 
-                <div className="dashboard-item">
+            </div>
 
-                  <h3>
-                    {task.title}
-                  </h3>
+            {
 
-                  <p>
+              (Array.isArray(task.comments)
+                ? task.comments
+                : []
+              ).length === 0 ? (
 
-                    {task.priority}
+                <div className="empty-state">
 
-                    {" • "}
-
-                    {task.status}
-
-                  </p>
+                  ✨ No comments yet.
 
                 </div>
 
-              </Link>
+              ) : (
 
-            ))
+                (Array.isArray(task.comments)
+                  ? task.comments
+                  : []
+                ).map(
+                  (comment,index)=>(
 
-          )}
+                    <div
+                      className="dashboard-item"
+                      key={index}
+                    >
 
-        </div>
+                      <p>
+                        {comment}
+                      </p>
 
-        {/* TEAM PRODUCTIVITY */}
+                    </div>
 
-        <div
-          className="dashboard-card"
-          style={{
-            marginTop:"24px"
-          }}
-        >
+                  )
+                )
 
-          <div className="card-header">
+              )
 
-            <h2>
-              Productivity Insights
-            </h2>
+            }
 
           </div>
 
-          <div className="insights-grid">
+          {/* ATTACHMENTS */}
 
-            <div className="insight-card">
+          <div className="dashboard-card">
 
-              <h3>
-                Total Tasks
-              </h3>
+            <div className="card-header">
 
-              <p>
-                {tasks.length}
-              </p>
+              <h2>
+                Attachments / URLs
+              </h2>
 
             </div>
 
-            <div className="insight-card">
+            <div
+              style={{
+                marginBottom:"18px"
+              }}
+            >
 
-              <h3>
-                Completed
-              </h3>
+              <input
+                value={attachment}
+                onChange={(e)=>
+                  setAttachment(
+                    e.target.value
+                  )
+                }
+                placeholder="Paste URL"
+                style={{
+                  width:"100%",
+                  marginBottom:"12px"
+                }}
+              />
 
-              <p>
-                {completedTasks}
-              </p>
+              <button
+                className="primary-btn"
+                onClick={addAttachment}
+              >
+                Add URL
+              </button>
 
             </div>
 
-            <div className="insight-card">
+            {
 
-              <h3>
-                Productivity
-              </h3>
+              (Array.isArray(task.attachments)
+                ? task.attachments
+                : []
+              ).length === 0 ? (
 
-              <p>
-                {productivity}%
-              </p>
+                <div className="empty-state">
 
-            </div>
+                  ✨ No attachments yet.
+
+                </div>
+
+              ) : (
+
+                (Array.isArray(task.attachments)
+                  ? task.attachments
+                  : []
+                ).map(
+                  (link,index)=>(
+
+                    <div
+                      className="dashboard-item"
+                      key={index}
+                    >
+
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="view-link"
+                      >
+
+                        {link}
+
+                      </a>
+
+                    </div>
+
+                  )
+                )
+
+              )
+
+            }
 
           </div>
 
