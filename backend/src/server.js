@@ -11,31 +11,47 @@ express();
 require("./db/database");
 
 /* =========================
-   MANUAL CORS FIX
+   MANUAL CORS
 ========================= */
 
 app.use((req,res,next)=>{
 
-  res.header(
+  res.setHeader(
     "Access-Control-Allow-Origin",
-    "*"
+    "https://task-team-manager.up.railway.app"
   );
 
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-
-  res.header(
+  res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, OPTIONS"
   );
+
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+
+  /* HANDLE PREFLIGHT */
 
   if(req.method === "OPTIONS"){
 
     return res.sendStatus(200);
 
   }
+
+  next();
+
+});
+
+/* =========================
+   REQUEST LOGGER
+========================= */
+
+app.use((req,res,next)=>{
+
+  console.log(
+    `${req.method} ${req.path}`
+  );
 
   next();
 
