@@ -1,256 +1,41 @@
 const router =
 require("express").Router();
 
-const db =
-require("../db/database");
+/* TEST ROUTE */
 
-/* =========================
-   SIGNUP
-========================= */
+router.get("/",(req,res)=>{
 
-router.post("/signup",(req,res)=>{
-
-  const {
-
-    name,
-
-    email,
-
-    password,
-
-    role
-
-  } = req.body;
-
-  /* VALIDATION */
-
-  if(
-
-    !name ||
-
-    !email ||
-
-    !password
-
-  ){
-
-    return res
-      .status(400)
-      .json({
-
-        error:
-        "All fields are required"
-
-      });
-
-  }
-
-  /* CHECK EXISTING USER */
-
-  db.get(
-    `
-    SELECT *
-
-    FROM users
-
-    WHERE email = ?
-    `,
-    [email],
-    (err,user)=>{
-
-      if(err){
-
-        console.log(err);
-
-        return res
-          .status(500)
-          .json({
-
-            error:
-            "Database error"
-
-          });
-
-      }
-
-      if(user){
-
-        return res
-          .status(400)
-          .json({
-
-            error:
-            "Email already exists"
-
-          });
-
-      }
-
-      /* CREATE USER */
-
-      db.run(
-        `
-        INSERT INTO users(
-
-          name,
-
-          email,
-
-          password,
-
-          role
-
-        )
-
-        VALUES(?,?,?,?)
-        `,
-        [
-
-          name,
-
-          email,
-
-          password,
-
-          role || "Member"
-
-        ],
-        function(err){
-
-          if(err){
-
-            console.log(err);
-
-            return res
-              .status(500)
-              .json({
-
-                error:
-                "Failed to create user"
-
-              });
-
-          }
-
-          res.json({
-
-            success:true,
-
-            user:{
-
-              id:this.lastID,
-
-              name,
-
-              email,
-
-              role:
-              role || "Member"
-
-            }
-
-          });
-
-        }
-      );
-
-    }
+  res.send(
+    "AUTH ROUTES WORKING"
   );
 
 });
 
-/* =========================
-   LOGIN
-========================= */
+/* TEST SIGNUP */
+
+router.post("/signup",(req,res)=>{
+
+  return res.json({
+
+    success:true,
+
+    message:"Signup working"
+
+  });
+
+});
+
+/* TEST LOGIN */
 
 router.post("/login",(req,res)=>{
 
-  const {
+  return res.json({
 
-    email,
+    success:true,
 
-    password
+    message:"Login working"
 
-  } = req.body;
-
-  /* VALIDATION */
-
-  if(
-
-    !email ||
-
-    !password
-
-  ){
-
-    return res
-      .status(400)
-      .json({
-
-        error:
-        "Email and password required"
-
-      });
-
-  }
-
-  db.get(
-    `
-    SELECT *
-
-    FROM users
-
-    WHERE email = ?
-
-    AND password = ?
-    `,
-    [
-
-      email,
-
-      password
-
-    ],
-    (err,user)=>{
-
-      if(err){
-
-        console.log(err);
-
-        return res
-          .status(500)
-          .json({
-
-            error:
-            "Database error"
-
-          });
-
-      }
-
-      if(!user){
-
-        return res
-          .status(401)
-          .json({
-
-            error:
-            "Invalid credentials"
-
-          });
-
-      }
-
-      res.json({
-
-        success:true,
-
-        user
-
-      });
-
-    }
-  );
+  });
 
 });
 
