@@ -1,17 +1,22 @@
-import { useState } from "react";
+import {
+  useState
+} from "react";
 
 import {
   Link,
   useNavigate
 } from "react-router-dom";
 
-import api from "../services/api";
+import api
+from "../services/api";
 
 export default function Signup(){
 
-  const navigate = useNavigate();
+  const navigate =
+  useNavigate();
 
-  const [form,setForm] = useState({
+  const [form,setForm] =
+  useState({
 
     name:"",
     email:"",
@@ -20,16 +25,64 @@ export default function Signup(){
 
   });
 
+  const [loading,setLoading] =
+  useState(false);
+
+  /* =========================
+     HANDLE CHANGE
+  ========================= */
+
+  const handleChange = (e)=>{
+
+    setForm({
+
+      ...form,
+
+      [e.target.name]:
+      e.target.value
+
+    });
+
+  };
+
+  /* =========================
+     SIGNUP
+  ========================= */
+
   const signup = async()=>{
 
     try{
 
+      setLoading(true);
+
+      const res =
       await api.post(
+
         "/auth/signup",
+
         form
+
       );
 
-      alert("User Created");
+      if(
+
+        !res.data ||
+
+        !res.data.success
+
+      ){
+
+        alert(
+          "Signup failed"
+        );
+
+        return;
+
+      }
+
+      alert(
+        "Account created successfully"
+      );
 
       navigate("/");
 
@@ -37,7 +90,17 @@ export default function Signup(){
 
       console.log(err);
 
-      alert("Signup failed");
+      alert(
+
+        err?.response?.data?.error ||
+
+        "Signup failed"
+
+      );
+
+    }finally{
+
+      setLoading(false);
 
     }
 
@@ -55,6 +118,8 @@ export default function Signup(){
 
         <div className="task-form">
 
+          {/* NAME */}
+
           <div className="form-group">
 
             <label>
@@ -63,17 +128,15 @@ export default function Signup(){
 
             <input
               type="text"
+              name="name"
               placeholder="Enter Name"
               value={form.name}
-              onChange={(e)=>
-                setForm({
-                  ...form,
-                  name:e.target.value
-                })
-              }
+              onChange={handleChange}
             />
 
           </div>
+
+          {/* EMAIL */}
 
           <div className="form-group">
 
@@ -83,17 +146,15 @@ export default function Signup(){
 
             <input
               type="email"
+              name="email"
               placeholder="Enter Email"
               value={form.email}
-              onChange={(e)=>
-                setForm({
-                  ...form,
-                  email:e.target.value
-                })
-              }
+              onChange={handleChange}
             />
 
           </div>
+
+          {/* PASSWORD */}
 
           <div className="form-group">
 
@@ -103,17 +164,15 @@ export default function Signup(){
 
             <input
               type="password"
+              name="password"
               placeholder="Enter Password"
               value={form.password}
-              onChange={(e)=>
-                setForm({
-                  ...form,
-                  password:e.target.value
-                })
-              }
+              onChange={handleChange}
             />
 
           </div>
+
+          {/* ROLE */}
 
           <div className="form-group">
 
@@ -122,20 +181,16 @@ export default function Signup(){
             </label>
 
             <select
+              name="role"
               value={form.role}
-              onChange={(e)=>
-                setForm({
-                  ...form,
-                  role:e.target.value
-                })
-              }
+              onChange={handleChange}
             >
 
-              <option>
+              <option value="Member">
                 Member
               </option>
 
-              <option>
+              <option value="Admin">
                 Admin
               </option>
 
@@ -145,12 +200,25 @@ export default function Signup(){
 
         </div>
 
+        {/* BUTTON */}
+
         <button
           className="primary-btn"
           onClick={signup}
+          disabled={loading}
         >
-          Create Account
+
+          {
+
+            loading
+            ? "Creating..."
+            : "Create Account"
+
+          }
+
         </button>
+
+        {/* FOOTER */}
 
         <p
           style={{
@@ -173,6 +241,6 @@ export default function Signup(){
 
     </div>
 
-  )
+  );
 
 }

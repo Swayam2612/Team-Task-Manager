@@ -23,6 +23,9 @@ export default function Login(){
 
   });
 
+  const [loading,setLoading] =
+  useState(false);
+
   const handleChange = (e)=>{
 
     setFormData({
@@ -40,29 +43,48 @@ export default function Login(){
 
     try{
 
+      setLoading(true);
+
       const res =
       await api.post(
+
         "/auth/login",
+
         formData
+
       );
 
-      /* SAVE CURRENT USER */
+      /* VALIDATE RESPONSE */
+
+      if(
+
+        !res.data ||
+
+        !res.data.success ||
+
+        !res.data.user
+
+      ){
+
+        alert(
+          "Login failed"
+        );
+
+        return;
+
+      }
+
+      /* SAVE USER */
 
       localStorage.setItem(
 
         "user",
 
-        JSON.stringify({
+        JSON.stringify(
 
-  id:res.data.id,
+          res.data.user
 
-  name:res.data.name,
-
-  email:res.data.email,
-
-  role:res.data.role
-
-})
+        )
 
       );
 
@@ -75,8 +97,16 @@ export default function Login(){
       console.log(err);
 
       alert(
+
+        err?.response?.data?.error ||
+
         "Invalid email or password"
+
       );
+
+    }finally{
+
+      setLoading(false);
 
     }
 
@@ -98,6 +128,8 @@ export default function Login(){
 
         <div className="auth-form">
 
+          {/* EMAIL */}
+
           <div className="form-group">
 
             <label>
@@ -113,6 +145,8 @@ export default function Login(){
             />
 
           </div>
+
+          {/* PASSWORD */}
 
           <div className="form-group">
 
@@ -130,11 +164,22 @@ export default function Login(){
 
           </div>
 
+          {/* BUTTON */}
+
           <button
             className="primary-btn"
             onClick={handleLogin}
+            disabled={loading}
           >
-            Login
+
+            {
+
+              loading
+              ? "Logging in..."
+              : "Login"
+
+            }
+
           </button>
 
         </div>
@@ -157,6 +202,6 @@ export default function Login(){
 
     </div>
 
-  )
+  );
 
 }
