@@ -5,181 +5,86 @@ const db =
 require("../db/database");
 
 /* =========================
-   TEST ROUTE
-========================= */
-
-router.get("/",(req,res)=>{
-
-  res.json({
-
-    success:true,
-
-    message:
-    "Auth routes working"
-
-  });
-
-});
-
-/* =========================
    SIGNUP
 ========================= */
 
 router.post("/signup",(req,res)=>{
 
+  console.log("SIGNUP REQUEST:", req.body);
+
   const {
-
     name,
-
     email,
-
     password,
-
     role
-
   } = req.body;
 
-  /* VALIDATION */
-
   if(
-
     !name ||
-
     !email ||
-
     !password
-
   ){
 
-    return res
-      .status(400)
-      .json({
+    return res.status(400).json({
 
-        success:false,
+      success:false,
 
-        error:
-        "All fields are required"
+      error:"All fields required"
 
-      });
+    });
 
   }
 
-  /* CHECK EXISTING USER */
+  db.run(
 
-  db.get(
     `
-    SELECT *
-
-    FROM users
-
-    WHERE email = ?
+    INSERT INTO users(
+      name,
+      email,
+      password,
+      role
+    )
+    VALUES(?,?,?,?)
     `,
-    [email],
-    (err,user)=>{
+
+    [
+      name,
+      email,
+      password,
+      role || "Member"
+    ],
+
+    function(err){
 
       if(err){
 
-        console.log(err);
+        console.log("SIGNUP DB ERROR:", err);
 
-        return res
-          .status(500)
-          .json({
+        return res.status(500).json({
 
-            success:false,
+          success:false,
 
-            error:
-            "Database error"
+          error:err.message
 
-          });
+        });
 
       }
 
-      if(user){
+      return res.json({
 
-        return res
-          .status(400)
-          .json({
+        success:true,
 
-            success:false,
-
-            error:
-            "Email already exists"
-
-          });
-
-      }
-
-      /* CREATE USER */
-
-      db.run(
-        `
-        INSERT INTO users(
-
+        user:{
+          id:this.lastID,
           name,
-
           email,
-
-          password,
-
-          role
-
-        )
-
-        VALUES(?,?,?,?)
-        `,
-        [
-
-          name,
-
-          email,
-
-          password,
-
-          role || "Member"
-
-        ],
-        function(err){
-
-          if(err){
-
-            console.log(err);
-
-            return res
-              .status(500)
-              .json({
-
-                success:false,
-
-                error:
-                "Failed to create account"
-
-              });
-
-          }
-
-          return res.json({
-
-            success:true,
-
-            user:{
-
-              id:this.lastID,
-
-              name,
-
-              email,
-
-              role:
-              role || "Member"
-
-            }
-
-          });
-
+          role:role || "Member"
         }
-      );
+
+      });
 
     }
+
   );
 
 });
@@ -190,83 +95,52 @@ router.post("/signup",(req,res)=>{
 
 router.post("/login",(req,res)=>{
 
+  console.log("LOGIN REQUEST:", req.body);
+
   const {
-
     email,
-
     password
-
   } = req.body;
 
-  if(
-
-    !email ||
-
-    !password
-
-  ){
-
-    return res
-      .status(400)
-      .json({
-
-        success:false,
-
-        error:
-        "Email and password required"
-
-      });
-
-  }
-
   db.get(
+
     `
     SELECT *
-
     FROM users
-
     WHERE email = ?
-
     AND password = ?
     `,
+
     [
-
       email,
-
       password
-
     ],
+
     (err,user)=>{
 
       if(err){
 
-        console.log(err);
+        console.log("LOGIN DB ERROR:", err);
 
-        return res
-          .status(500)
-          .json({
+        return res.status(500).json({
 
-            success:false,
+          success:false,
 
-            error:
-            "Database error"
+          error:err.message
 
-          });
+        });
 
       }
 
       if(!user){
 
-        return res
-          .status(401)
-          .json({
+        return res.status(401).json({
 
-            success:false,
+          success:false,
 
-            error:
-            "Invalid credentials"
+          error:"Invalid credentials"
 
-          });
+        });
 
       }
 
@@ -279,6 +153,7 @@ router.post("/login",(req,res)=>{
       });
 
     }
+
   );
 
 });
