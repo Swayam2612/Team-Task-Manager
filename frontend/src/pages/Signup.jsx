@@ -55,6 +55,11 @@ export default function Signup(){
 
       setLoading(true);
 
+      console.log(
+        "SIGNUP DATA:",
+        form
+      );
+
       const res =
       await api.post(
 
@@ -62,6 +67,11 @@ export default function Signup(){
 
         form
 
+      );
+
+      console.log(
+        "SIGNUP RESPONSE:",
+        res.data
       );
 
       if(
@@ -88,7 +98,10 @@ export default function Signup(){
 
     }catch(err){
 
-      console.log(err);
+      console.log(
+        "SIGNUP ERROR:",
+        err
+      );
 
       alert(
 

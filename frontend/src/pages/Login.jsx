@@ -53,6 +53,11 @@ export default function Login(){
 
       setLoading(true);
 
+      console.log(
+        "LOGIN DATA:",
+        formData
+      );
+
       const res =
       await api.post(
 
@@ -60,6 +65,11 @@ export default function Login(){
 
         formData
 
+      );
+
+      console.log(
+        "LOGIN RESPONSE:",
+        res.data
       );
 
       if(
@@ -100,7 +110,10 @@ export default function Login(){
 
     }catch(err){
 
-      console.log(err);
+      console.log(
+        "LOGIN ERROR:",
+        err
+      );
 
       alert(
 
