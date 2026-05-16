@@ -26,6 +26,10 @@ export default function Login(){
   const [loading,setLoading] =
   useState(false);
 
+  /* =========================
+     HANDLE INPUT
+  ========================= */
+
   const handleChange = (e)=>{
 
     setFormData({
@@ -38,6 +42,10 @@ export default function Login(){
     });
 
   };
+
+  /* =========================
+     LOGIN
+  ========================= */
 
   const handleLogin = async()=>{
 
@@ -53,8 +61,6 @@ export default function Login(){
         formData
 
       );
-
-      /* VALIDATE RESPONSE */
 
       if(
 

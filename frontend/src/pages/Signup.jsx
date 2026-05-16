@@ -29,7 +29,7 @@ export default function Signup(){
   useState(false);
 
   /* =========================
-     HANDLE CHANGE
+     HANDLE INPUT
   ========================= */
 
   const handleChange = (e)=>{
